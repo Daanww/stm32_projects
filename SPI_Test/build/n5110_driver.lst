@@ -1,4 +1,4 @@
-ARM GAS  /tmp/ccIxc9Ce.s 			page 1
+ARM GAS  /tmp/ccVG0MLh.s 			page 1
 
 
    1              		.cpu cortex-m3
@@ -15,945 +15,926 @@ ARM GAS  /tmp/ccIxc9Ce.s 			page 1
   12              		.text
   13              	.Ltext0:
   14              		.cfi_sections	.debug_frame
-  15              		.section	.text.init_n5110,"ax",%progbits
+  15              		.section	.text.spi_tx_byte,"ax",%progbits
   16              		.align	1
-  17              		.global	init_n5110
+  17              		.global	spi_tx_byte
   18              		.arch armv7-m
   19              		.syntax unified
   20              		.thumb
   21              		.thumb_func
   22              		.fpu softvfp
-  24              	init_n5110:
-  25              	.LFB65:
-  26              		.file 1 "Core/Src/n5110_driver.c"
+  24              	spi_tx_byte:
+  25              	.LVL0:
+  26              	.LFB66:
+  27              		.file 1 "Core/Src/n5110_driver.c"
    1:Core/Src/n5110_driver.c **** #include "main.h"
    2:Core/Src/n5110_driver.c **** #include "n5110_driver.h"
    3:Core/Src/n5110_driver.c **** 
    4:Core/Src/n5110_driver.c **** 
    5:Core/Src/n5110_driver.c **** 
-   6:Core/Src/n5110_driver.c **** 
-   7:Core/Src/n5110_driver.c **** // Font 7x5 Bitmap (ASCII)
-   8:Core/Src/n5110_driver.c **** char FONT_7x5[96][5] = {
-   9:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}, // space
-  10:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01001111,0b00000000,0b00000000}, // !
-  11:Core/Src/n5110_driver.c ****  {0b00000000,0b00000111,0b00000000,0b00000111,0b00000000}, // "
-  12:Core/Src/n5110_driver.c ****  {0b00010100,0b01111111,0b00010100,0b01111111,0b00010100}, // #
-  13:Core/Src/n5110_driver.c ****  {0b00100100,0b00101010,0b01111111,0b00101010,0b00010010}, // $
-  14:Core/Src/n5110_driver.c ****  {0b00100011,0b00010011,0b00001000,0b01100100,0b01100010}, // %
-  15:Core/Src/n5110_driver.c ****  {0b00110110,0b01001001,0b01010101,0b00100010,0b01010000}, // &
-  16:Core/Src/n5110_driver.c ****  {0b00000000,0b00000101,0b00000011,0b00000000,0b00000000}, // '
-  17:Core/Src/n5110_driver.c ****  {0b00000000,0b00011100,0b00100010,0b01000001,0b00000000}, // (
-  18:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00100010,0b00011100,0b00000000}, // )
-  19:Core/Src/n5110_driver.c ****  {0b00010100,0b00001000,0b00111110,0b00001000,0b00010100}, // *
-  20:Core/Src/n5110_driver.c ****  {0b00001000,0b00001000,0b00111110,0b00001000,0b00001000}, // +
-  21:Core/Src/n5110_driver.c ****  {0b00000000,0b01010000,0b00110000,0b00000000,0b00000000}, // ,
-  22:Core/Src/n5110_driver.c ****  {0b00001000,0b00001000,0b00001000,0b00001000,0b00001000}, // -
-  23:Core/Src/n5110_driver.c ****  {0b00000000,0b01100000,0b01100000,0b00000000,0b00000000}, // .
-  24:Core/Src/n5110_driver.c ****  {0b00100000,0b00010000,0b00001000,0b00000100,0b00000010}, // /
-  25:Core/Src/n5110_driver.c ****  {0b00111110,0b01010001,0b01001001,0b01000101,0b00111110}, // 0
-  26:Core/Src/n5110_driver.c ****  {0b00000000,0b01000010,0b01111111,0b01000000,0b00000000}, // 1
-  27:Core/Src/n5110_driver.c ****  {0b01000010,0b01100001,0b01010001,0b01001001,0b01000110}, // 2
-  28:Core/Src/n5110_driver.c ****  {0b00100001,0b01000001,0b01000101,0b01001011,0b00110001}, // 3
-  29:Core/Src/n5110_driver.c ****  {0b00011000,0b00010100,0b00010010,0b01111111,0b00010000}, // 4
-  30:Core/Src/n5110_driver.c ****  {0b00100111,0b01000101,0b01000101,0b01000101,0b00111001}, // 5
-  31:Core/Src/n5110_driver.c ****  {0b00111100,0b01001010,0b01001001,0b01001001,0b00110000}, // 6
-  32:Core/Src/n5110_driver.c ****  {0b00000011,0b01110001,0b00001001,0b00000101,0b00000011}, // 7
-ARM GAS  /tmp/ccIxc9Ce.s 			page 2
+   6:Core/Src/n5110_driver.c **** /* configure pins for screen communication  */
+   7:Core/Src/n5110_driver.c **** #define LED LED_Pin
+   8:Core/Src/n5110_driver.c **** #define LED_PORT GPIOB
+   9:Core/Src/n5110_driver.c **** 
+  10:Core/Src/n5110_driver.c **** #define DC DC_Pin
+  11:Core/Src/n5110_driver.c **** #define DC_PORT GPIOA
+  12:Core/Src/n5110_driver.c **** 
+  13:Core/Src/n5110_driver.c **** #define RST RST_Pin
+  14:Core/Src/n5110_driver.c **** #define RST_PORT GPIOA
+  15:Core/Src/n5110_driver.c **** 
+  16:Core/Src/n5110_driver.c **** #define SCE SCE_Pin
+  17:Core/Src/n5110_driver.c **** #define SCE_PORT GPIOA
+  18:Core/Src/n5110_driver.c **** 
+  19:Core/Src/n5110_driver.c **** #define VCC VCC_Pin
+  20:Core/Src/n5110_driver.c **** #define VCC_PORT GPIOB
+  21:Core/Src/n5110_driver.c **** 
+  22:Core/Src/n5110_driver.c **** 
+  23:Core/Src/n5110_driver.c **** 
+  24:Core/Src/n5110_driver.c **** // Font 7x5 Bitmap (ASCII)
+  25:Core/Src/n5110_driver.c **** char FONT_7x5[96][5] = {
+  26:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}, // space
+  27:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01001111,0b00000000,0b00000000}, // !
+  28:Core/Src/n5110_driver.c ****  {0b00000000,0b00000111,0b00000000,0b00000111,0b00000000}, // "
+  29:Core/Src/n5110_driver.c ****  {0b00010100,0b01111111,0b00010100,0b01111111,0b00010100}, // #
+  30:Core/Src/n5110_driver.c ****  {0b00100100,0b00101010,0b01111111,0b00101010,0b00010010}, // $
+  31:Core/Src/n5110_driver.c ****  {0b00100011,0b00010011,0b00001000,0b01100100,0b01100010}, // %
+ARM GAS  /tmp/ccVG0MLh.s 			page 2
 
 
-  33:Core/Src/n5110_driver.c ****  {0b00110110,0b01001001,0b01001001,0b01001001,0b00110110}, // 8
-  34:Core/Src/n5110_driver.c ****  {0b00000110,0b01001001,0b01001001,0b00101001,0b00011110}, // 9
-  35:Core/Src/n5110_driver.c ****  {0b00000000,0b01101100,0b01101100,0b00000000,0b00000000}, // :
-  36:Core/Src/n5110_driver.c ****  {0b00000000,0b01010110,0b00110110,0b00000000,0b00000000}, // ;
-  37:Core/Src/n5110_driver.c ****  {0b00001000,0b00010100,0b00100010,0b01000001,0b00000000}, // <
-  38:Core/Src/n5110_driver.c ****  {0b00010100,0b00010100,0b00010100,0b00010100,0b00010100}, // =
-  39:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00100010,0b00010100,0b00001000}, // >
-  40:Core/Src/n5110_driver.c ****  {0b00000010,0b00000001,0b01010001,0b00001001,0b00000110}, // ?
-  41:Core/Src/n5110_driver.c ****  {0b00110010,0b01001001,0b01111001,0b01000001,0b00111110}, // @
-  42:Core/Src/n5110_driver.c ****  {0b01111110,0b00010001,0b00010001,0b00010001,0b01111110}, // A
-  43:Core/Src/n5110_driver.c ****  {0b01111111,0b01001001,0b01001001,0b01001001,0b00111110}, // B
-  44:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01000001,0b01000001,0b00100010}, // C
-  45:Core/Src/n5110_driver.c ****  {0b01111111,0b01000001,0b01000001,0b01000001,0b00111110}, // D
-  46:Core/Src/n5110_driver.c ****  {0b01111111,0b01001001,0b01001001,0b01001001,0b01001001}, // E
-  47:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00001001,0b00000001}, // F
-  48:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01001001,0b01001001,0b00111010}, // G
-  49:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00001000,0b00001000,0b01111111}, // H
-  50:Core/Src/n5110_driver.c ****  {0b01000001,0b01000001,0b01111111,0b01000001,0b01000001}, // I
-  51:Core/Src/n5110_driver.c ****  {0b00110000,0b01000001,0b01000001,0b00111111,0b00000001}, // J
-  52:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00010100,0b00100010,0b01000001}, // K
-  53:Core/Src/n5110_driver.c ****  {0b01111111,0b01000000,0b01000000,0b01000000,0b01000000}, // L
-  54:Core/Src/n5110_driver.c ****  {0b01111111,0b00000010,0b00001100,0b00000010,0b01111111}, // M
-  55:Core/Src/n5110_driver.c ****  {0b01111111,0b00000100,0b00001000,0b00010000,0b01111111}, // N
-  56:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01000001,0b01000001,0b00111110}, // O
-  57:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00001001,0b00000110}, // P
-  58:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01010001,0b00100001,0b01011110}, // Q
-  59:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00011001,0b01100110}, // R
-  60:Core/Src/n5110_driver.c ****  {0b01000110,0b01001001,0b01001001,0b01001001,0b00110001}, // S
-  61:Core/Src/n5110_driver.c ****  {0b00000001,0b00000001,0b01111111,0b00000001,0b00000001}, // T
-  62:Core/Src/n5110_driver.c ****  {0b00111111,0b01000000,0b01000000,0b01000000,0b00111111}, // U
-  63:Core/Src/n5110_driver.c ****  {0b00001111,0b00110000,0b01000000,0b00110000,0b00001111}, // V
-  64:Core/Src/n5110_driver.c ****  {0b00111111,0b01000000,0b00111000,0b01000000,0b00111111}, // W
-  65:Core/Src/n5110_driver.c ****  {0b01100011,0b00010100,0b00001000,0b00010100,0b01100011}, // X
-  66:Core/Src/n5110_driver.c ****  {0b00000011,0b00000100,0b01111000,0b00000100,0b00000011}, // Y
-  67:Core/Src/n5110_driver.c ****  {0b01100001,0b01010001,0b01001001,0b01000101,0b01000011}, // Z
-  68:Core/Src/n5110_driver.c ****  {0b01111111,0b01000001,0b01000001,0b00000000,0b00000000}, // [
-  69:Core/Src/n5110_driver.c ****  {0b00000010,0b00000100,0b00001000,0b00010000,0b00100000}, // '\'
-  70:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01000001,0b01000001,0b01111111}, // ]
-  71:Core/Src/n5110_driver.c ****  {0b00000100,0b00000010,0b00000001,0b00000010,0b00000100}, // ^
-  72:Core/Src/n5110_driver.c ****  {0b01000000,0b01000000,0b01000000,0b01000000,0b01000000}, // _
-  73:Core/Src/n5110_driver.c ****  {0b00000000,0b00000001,0b00000010,0b00000100,0b00000000}, // `
-  74:Core/Src/n5110_driver.c ****  {0b00100000,0b01010100,0b01010100,0b01010100,0b01111000}, // a
-  75:Core/Src/n5110_driver.c ****  {0b01111111,0b01001000,0b01000100,0b01000100,0b00111000}, // 0b
-  76:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01000100,0b00100000}, // c
-  77:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01001000,0b01111111}, // d
-  78:Core/Src/n5110_driver.c ****  {0b00111000,0b01010100,0b01010100,0b01010100,0b00011000}, // e
-  79:Core/Src/n5110_driver.c ****  {0b00001000,0b01111110,0b00001001,0b00000001,0b00000010}, // f
-  80:Core/Src/n5110_driver.c ****  {0b00001100,0b01010010,0b01010010,0b01010010,0b00111110}, // g
-  81:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00000100,0b00000100,0b01111000}, // h
-  82:Core/Src/n5110_driver.c ****  {0b00000000,0b01000100,0b01111101,0b01000000,0b00000000}, // i
-  83:Core/Src/n5110_driver.c ****  {0b00100000,0b01000000,0b01000100,0b00111101,0b00000000}, // j
-  84:Core/Src/n5110_driver.c ****  {0b01111111,0b00010000,0b00101000,0b01000100,0b00000000}, // k
-  85:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b01111111,0b01000000,0b00000000}, // l
-  86:Core/Src/n5110_driver.c ****  {0b01111000,0b00000100,0b00001000,0b00000100,0b01111000}, // m
-  87:Core/Src/n5110_driver.c ****  {0b01111100,0b00001000,0b00000100,0b00000100,0b01111000}, // n
-  88:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01000100,0b00111000}, // o
-  89:Core/Src/n5110_driver.c ****  {0b01111100,0b00010100,0b00010100,0b00010100,0b00001000}, // p
-ARM GAS  /tmp/ccIxc9Ce.s 			page 3
+  32:Core/Src/n5110_driver.c ****  {0b00110110,0b01001001,0b01010101,0b00100010,0b01010000}, // &
+  33:Core/Src/n5110_driver.c ****  {0b00000000,0b00000101,0b00000011,0b00000000,0b00000000}, // '
+  34:Core/Src/n5110_driver.c ****  {0b00000000,0b00011100,0b00100010,0b01000001,0b00000000}, // (
+  35:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00100010,0b00011100,0b00000000}, // )
+  36:Core/Src/n5110_driver.c ****  {0b00010100,0b00001000,0b00111110,0b00001000,0b00010100}, // *
+  37:Core/Src/n5110_driver.c ****  {0b00001000,0b00001000,0b00111110,0b00001000,0b00001000}, // +
+  38:Core/Src/n5110_driver.c ****  {0b00000000,0b01010000,0b00110000,0b00000000,0b00000000}, // ,
+  39:Core/Src/n5110_driver.c ****  {0b00001000,0b00001000,0b00001000,0b00001000,0b00001000}, // -
+  40:Core/Src/n5110_driver.c ****  {0b00000000,0b01100000,0b01100000,0b00000000,0b00000000}, // .
+  41:Core/Src/n5110_driver.c ****  {0b00100000,0b00010000,0b00001000,0b00000100,0b00000010}, // /
+  42:Core/Src/n5110_driver.c ****  {0b00111110,0b01010001,0b01001001,0b01000101,0b00111110}, // 0
+  43:Core/Src/n5110_driver.c ****  {0b00000000,0b01000010,0b01111111,0b01000000,0b00000000}, // 1
+  44:Core/Src/n5110_driver.c ****  {0b01000010,0b01100001,0b01010001,0b01001001,0b01000110}, // 2
+  45:Core/Src/n5110_driver.c ****  {0b00100001,0b01000001,0b01000101,0b01001011,0b00110001}, // 3
+  46:Core/Src/n5110_driver.c ****  {0b00011000,0b00010100,0b00010010,0b01111111,0b00010000}, // 4
+  47:Core/Src/n5110_driver.c ****  {0b00100111,0b01000101,0b01000101,0b01000101,0b00111001}, // 5
+  48:Core/Src/n5110_driver.c ****  {0b00111100,0b01001010,0b01001001,0b01001001,0b00110000}, // 6
+  49:Core/Src/n5110_driver.c ****  {0b00000011,0b01110001,0b00001001,0b00000101,0b00000011}, // 7
+  50:Core/Src/n5110_driver.c ****  {0b00110110,0b01001001,0b01001001,0b01001001,0b00110110}, // 8
+  51:Core/Src/n5110_driver.c ****  {0b00000110,0b01001001,0b01001001,0b00101001,0b00011110}, // 9
+  52:Core/Src/n5110_driver.c ****  {0b00000000,0b01101100,0b01101100,0b00000000,0b00000000}, // :
+  53:Core/Src/n5110_driver.c ****  {0b00000000,0b01010110,0b00110110,0b00000000,0b00000000}, // ;
+  54:Core/Src/n5110_driver.c ****  {0b00001000,0b00010100,0b00100010,0b01000001,0b00000000}, // <
+  55:Core/Src/n5110_driver.c ****  {0b00010100,0b00010100,0b00010100,0b00010100,0b00010100}, // =
+  56:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00100010,0b00010100,0b00001000}, // >
+  57:Core/Src/n5110_driver.c ****  {0b00000010,0b00000001,0b01010001,0b00001001,0b00000110}, // ?
+  58:Core/Src/n5110_driver.c ****  {0b00110010,0b01001001,0b01111001,0b01000001,0b00111110}, // @
+  59:Core/Src/n5110_driver.c ****  {0b01111110,0b00010001,0b00010001,0b00010001,0b01111110}, // A
+  60:Core/Src/n5110_driver.c ****  {0b01111111,0b01001001,0b01001001,0b01001001,0b00111110}, // B
+  61:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01000001,0b01000001,0b00100010}, // C
+  62:Core/Src/n5110_driver.c ****  {0b01111111,0b01000001,0b01000001,0b01000001,0b00111110}, // D
+  63:Core/Src/n5110_driver.c ****  {0b01111111,0b01001001,0b01001001,0b01001001,0b01001001}, // E
+  64:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00001001,0b00000001}, // F
+  65:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01001001,0b01001001,0b00111010}, // G
+  66:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00001000,0b00001000,0b01111111}, // H
+  67:Core/Src/n5110_driver.c ****  {0b01000001,0b01000001,0b01111111,0b01000001,0b01000001}, // I
+  68:Core/Src/n5110_driver.c ****  {0b00110000,0b01000001,0b01000001,0b00111111,0b00000001}, // J
+  69:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00010100,0b00100010,0b01000001}, // K
+  70:Core/Src/n5110_driver.c ****  {0b01111111,0b01000000,0b01000000,0b01000000,0b01000000}, // L
+  71:Core/Src/n5110_driver.c ****  {0b01111111,0b00000010,0b00001100,0b00000010,0b01111111}, // M
+  72:Core/Src/n5110_driver.c ****  {0b01111111,0b00000100,0b00001000,0b00010000,0b01111111}, // N
+  73:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01000001,0b01000001,0b00111110}, // O
+  74:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00001001,0b00000110}, // P
+  75:Core/Src/n5110_driver.c ****  {0b00111110,0b01000001,0b01010001,0b00100001,0b01011110}, // Q
+  76:Core/Src/n5110_driver.c ****  {0b01111111,0b00001001,0b00001001,0b00011001,0b01100110}, // R
+  77:Core/Src/n5110_driver.c ****  {0b01000110,0b01001001,0b01001001,0b01001001,0b00110001}, // S
+  78:Core/Src/n5110_driver.c ****  {0b00000001,0b00000001,0b01111111,0b00000001,0b00000001}, // T
+  79:Core/Src/n5110_driver.c ****  {0b00111111,0b01000000,0b01000000,0b01000000,0b00111111}, // U
+  80:Core/Src/n5110_driver.c ****  {0b00001111,0b00110000,0b01000000,0b00110000,0b00001111}, // V
+  81:Core/Src/n5110_driver.c ****  {0b00111111,0b01000000,0b00111000,0b01000000,0b00111111}, // W
+  82:Core/Src/n5110_driver.c ****  {0b01100011,0b00010100,0b00001000,0b00010100,0b01100011}, // X
+  83:Core/Src/n5110_driver.c ****  {0b00000011,0b00000100,0b01111000,0b00000100,0b00000011}, // Y
+  84:Core/Src/n5110_driver.c ****  {0b01100001,0b01010001,0b01001001,0b01000101,0b01000011}, // Z
+  85:Core/Src/n5110_driver.c ****  {0b01111111,0b01000001,0b01000001,0b00000000,0b00000000}, // [
+  86:Core/Src/n5110_driver.c ****  {0b00000010,0b00000100,0b00001000,0b00010000,0b00100000}, // '\'
+  87:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01000001,0b01000001,0b01111111}, // ]
+  88:Core/Src/n5110_driver.c ****  {0b00000100,0b00000010,0b00000001,0b00000010,0b00000100}, // ^
+ARM GAS  /tmp/ccVG0MLh.s 			page 3
 
 
-  90:Core/Src/n5110_driver.c ****  {0b00001000,0b00010100,0b00010100,0b01111100,0b00000000}, // q
-  91:Core/Src/n5110_driver.c ****  {0b01111100,0b00001000,0b00000100,0b00000100,0b00001000}, // r
-  92:Core/Src/n5110_driver.c ****  {0b01001000,0b01010100,0b01010100,0b01010100,0b00100000}, // s
-  93:Core/Src/n5110_driver.c ****  {0b00000100,0b00111111,0b01000100,0b01000000,0b00100000}, // t
-  94:Core/Src/n5110_driver.c ****  {0b00111100,0b01000000,0b01000000,0b00100000,0b01111100}, // u
-  95:Core/Src/n5110_driver.c ****  {0b00011100,0b00100000,0b01000000,0b00100000,0b00011100}, // v
-  96:Core/Src/n5110_driver.c ****  {0b00111100,0b01000000,0b00110000,0b01000000,0b00111100}, // w
-  97:Core/Src/n5110_driver.c ****  {0b01000100,0b00101000,0b00010000,0b00101000,0b01000100}, // x
-  98:Core/Src/n5110_driver.c ****  {0b00001100,0b01010000,0b01010000,0b01010000,0b00111100}, // y
-  99:Core/Src/n5110_driver.c ****  {0b01000100,0b01100100,0b01010100,0b01001100,0b01000100}, // z
- 100:Core/Src/n5110_driver.c ****  {0b00000000,0b00001000,0b00110110,0b01000001,0b00000000}, // {
- 101:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01111111,0b00000000,0b00000000}, // |
- 102:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00110110,0b00001000,0b00000000}, // }
- 103:Core/Src/n5110_driver.c ****  {0b00001000,0b00000100,0b00000100,0b00001000,0b00000100}  // ~
- 104:Core/Src/n5110_driver.c **** };
- 105:Core/Src/n5110_driver.c **** 
- 106:Core/Src/n5110_driver.c **** static uint8_t screen_buffer[SCREEN_WIDTH][SCREEN_HEIGHT/8]; //screen buffer
- 107:Core/Src/n5110_driver.c **** 
- 108:Core/Src/n5110_driver.c **** void init_n5110() {
-  27              		.loc 1 108 19 view -0
-  28              		.cfi_startproc
-  29              		@ args = 0, pretend = 0, frame = 8
-  30              		@ frame_needed = 0, uses_anonymous_args = 0
-  31 0000 30B5     		push	{r4, r5, lr}
-  32              	.LCFI0:
-  33              		.cfi_def_cfa_offset 12
-  34              		.cfi_offset 4, -12
-  35              		.cfi_offset 5, -8
-  36              		.cfi_offset 14, -4
-  37 0002 83B0     		sub	sp, sp, #12
-  38              	.LCFI1:
-  39              		.cfi_def_cfa_offset 24
- 109:Core/Src/n5110_driver.c **** 
- 110:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1); //set SCE to high to make sure display driver doesnt accept 
-  40              		.loc 1 110 2 view .LVU1
-  41 0004 3B4C     		ldr	r4, .L3
-  42 0006 0122     		movs	r2, #1
-  43 0008 0821     		movs	r1, #8
-  44 000a 2046     		mov	r0, r4
-  45 000c FFF7FEFF 		bl	HAL_GPIO_WritePin
-  46              	.LVL0:
- 111:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOB, VCC_Pin, 1); //turn on display driver
-  47              		.loc 1 111 2 view .LVU2
-  48 0010 394D     		ldr	r5, .L3+4
-  49 0012 0122     		movs	r2, #1
-  50 0014 4FF40061 		mov	r1, #2048
-  51 0018 2846     		mov	r0, r5
-  52 001a FFF7FEFF 		bl	HAL_GPIO_WritePin
-  53              	.LVL1:
- 112:Core/Src/n5110_driver.c **** 
- 113:Core/Src/n5110_driver.c **** 	//briefly set rst pint to 0 to reset display driver
- 114:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, RST_Pin, 1);
-  54              		.loc 1 114 2 view .LVU3
-  55 001e 0122     		movs	r2, #1
-  56 0020 1021     		movs	r1, #16
-  57 0022 2046     		mov	r0, r4
-  58 0024 FFF7FEFF 		bl	HAL_GPIO_WritePin
-ARM GAS  /tmp/ccIxc9Ce.s 			page 4
-
-
-  59              	.LVL2:
- 115:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
-  60              		.loc 1 115 2 view .LVU4
-  61 0028 0A20     		movs	r0, #10
-  62 002a FFF7FEFF 		bl	HAL_Delay
-  63              	.LVL3:
- 116:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, RST_Pin, 0);
-  64              		.loc 1 116 2 view .LVU5
-  65 002e 0022     		movs	r2, #0
-  66 0030 1021     		movs	r1, #16
-  67 0032 2046     		mov	r0, r4
-  68 0034 FFF7FEFF 		bl	HAL_GPIO_WritePin
-  69              	.LVL4:
- 117:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
-  70              		.loc 1 117 2 view .LVU6
-  71 0038 0A20     		movs	r0, #10
-  72 003a FFF7FEFF 		bl	HAL_Delay
-  73              	.LVL5:
- 118:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, RST_Pin, 1);
-  74              		.loc 1 118 2 view .LVU7
-  75 003e 0122     		movs	r2, #1
-  76 0040 1021     		movs	r1, #16
-  77 0042 2046     		mov	r0, r4
-  78 0044 FFF7FEFF 		bl	HAL_GPIO_WritePin
-  79              	.LVL6:
- 119:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
-  80              		.loc 1 119 2 view .LVU8
-  81 0048 0A20     		movs	r0, #10
-  82 004a FFF7FEFF 		bl	HAL_Delay
-  83              	.LVL7:
- 120:Core/Src/n5110_driver.c **** 
- 121:Core/Src/n5110_driver.c **** 	//test display led
- 122:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOB, LED_Pin, 1);
-  84              		.loc 1 122 2 view .LVU9
-  85 004e 0122     		movs	r2, #1
-  86 0050 4FF48061 		mov	r1, #1024
-  87 0054 2846     		mov	r0, r5
-  88 0056 FFF7FEFF 		bl	HAL_GPIO_WritePin
-  89              	.LVL8:
- 123:Core/Src/n5110_driver.c **** 
- 124:Core/Src/n5110_driver.c **** 	uint8_t init_display_instructions[] = {0b00100001,	//function set PD=0, V=0, H=1 (extended instruc
-  90              		.loc 1 124 2 view .LVU10
-  91              		.loc 1 124 10 is_stmt 0 view .LVU11
-  92 005a 284B     		ldr	r3, .L3+8
-  93 005c 0193     		str	r3, [sp, #4]
- 125:Core/Src/n5110_driver.c **** 										   0b11010000,	//set Vop to +16 * b[V]
- 126:Core/Src/n5110_driver.c **** 										   0b00100000,	//function set PD=0, V=0, H=0 (normal instruction set)
- 127:Core/Src/n5110_driver.c **** 										   0b00001100}; //display control set normal mode (D=1, E=0)
- 128:Core/Src/n5110_driver.c **** 
- 129:Core/Src/n5110_driver.c **** 	//set DC to 0 for commands
- 130:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, DC_Pin, 0);
-  94              		.loc 1 130 2 is_stmt 1 view .LVU12
-  95 005e 0022     		movs	r2, #0
-  96 0060 4021     		movs	r1, #64
-  97 0062 2046     		mov	r0, r4
-  98 0064 FFF7FEFF 		bl	HAL_GPIO_WritePin
-  99              	.LVL9:
-ARM GAS  /tmp/ccIxc9Ce.s 			page 5
-
-
- 131:Core/Src/n5110_driver.c **** 
- 132:Core/Src/n5110_driver.c **** 	//function set PD=0, V=0, H=1 (extended instruction set)
- 133:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
- 100              		.loc 1 133 2 view .LVU13
- 101 0068 0022     		movs	r2, #0
- 102 006a 0821     		movs	r1, #8
- 103 006c 2046     		mov	r0, r4
- 104 006e FFF7FEFF 		bl	HAL_GPIO_WritePin
- 105              	.LVL10:
- 134:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &init_display_instructions[0], 1, 10);
- 106              		.loc 1 134 2 view .LVU14
- 107 0072 234D     		ldr	r5, .L3+12
- 108 0074 0A23     		movs	r3, #10
- 109 0076 0122     		movs	r2, #1
- 110 0078 01A9     		add	r1, sp, #4
- 111 007a 2846     		mov	r0, r5
- 112 007c FFF7FEFF 		bl	HAL_SPI_Transmit
- 113              	.LVL11:
- 135:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
- 114              		.loc 1 135 2 view .LVU15
- 115 0080 0122     		movs	r2, #1
- 116 0082 0821     		movs	r1, #8
- 117 0084 2046     		mov	r0, r4
- 118 0086 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 119              	.LVL12:
- 136:Core/Src/n5110_driver.c **** 
- 137:Core/Src/n5110_driver.c **** 	//set Vop to +16 * b[V]
- 138:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
- 120              		.loc 1 138 2 view .LVU16
- 121 008a 0022     		movs	r2, #0
- 122 008c 0821     		movs	r1, #8
- 123 008e 2046     		mov	r0, r4
- 124 0090 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 125              	.LVL13:
- 139:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &init_display_instructions[1], 1, 10);
- 126              		.loc 1 139 2 view .LVU17
- 127 0094 0A23     		movs	r3, #10
- 128 0096 0122     		movs	r2, #1
- 129 0098 0DF10501 		add	r1, sp, #5
- 130 009c 2846     		mov	r0, r5
- 131 009e FFF7FEFF 		bl	HAL_SPI_Transmit
- 132              	.LVL14:
- 140:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
- 133              		.loc 1 140 2 view .LVU18
- 134 00a2 0122     		movs	r2, #1
- 135 00a4 0821     		movs	r1, #8
- 136 00a6 2046     		mov	r0, r4
- 137 00a8 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 138              	.LVL15:
+  89:Core/Src/n5110_driver.c ****  {0b01000000,0b01000000,0b01000000,0b01000000,0b01000000}, // _
+  90:Core/Src/n5110_driver.c ****  {0b00000000,0b00000001,0b00000010,0b00000100,0b00000000}, // `
+  91:Core/Src/n5110_driver.c ****  {0b00100000,0b01010100,0b01010100,0b01010100,0b01111000}, // a
+  92:Core/Src/n5110_driver.c ****  {0b01111111,0b01001000,0b01000100,0b01000100,0b00111000}, // b
+  93:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01000100,0b00100000}, // c
+  94:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01001000,0b01111111}, // d
+  95:Core/Src/n5110_driver.c ****  {0b00111000,0b01010100,0b01010100,0b01010100,0b00011000}, // e
+  96:Core/Src/n5110_driver.c ****  {0b00001000,0b01111110,0b00001001,0b00000001,0b00000010}, // f
+  97:Core/Src/n5110_driver.c ****  {0b00001100,0b01010010,0b01010010,0b01010010,0b00111110}, // g
+  98:Core/Src/n5110_driver.c ****  {0b01111111,0b00001000,0b00000100,0b00000100,0b01111000}, // h
+  99:Core/Src/n5110_driver.c ****  {0b00000000,0b01000100,0b01111101,0b01000000,0b00000000}, // i
+ 100:Core/Src/n5110_driver.c ****  {0b00100000,0b01000000,0b01000100,0b00111101,0b00000000}, // j
+ 101:Core/Src/n5110_driver.c ****  {0b01111111,0b00010000,0b00101000,0b01000100,0b00000000}, // k
+ 102:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b01111111,0b01000000,0b00000000}, // l
+ 103:Core/Src/n5110_driver.c ****  {0b01111000,0b00000100,0b00001000,0b00000100,0b01111000}, // m
+ 104:Core/Src/n5110_driver.c ****  {0b01111100,0b00001000,0b00000100,0b00000100,0b01111000}, // n
+ 105:Core/Src/n5110_driver.c ****  {0b00111000,0b01000100,0b01000100,0b01000100,0b00111000}, // o
+ 106:Core/Src/n5110_driver.c ****  {0b01111100,0b00010100,0b00010100,0b00010100,0b00001000}, // p
+ 107:Core/Src/n5110_driver.c ****  {0b00001000,0b00010100,0b00010100,0b01111100,0b00000000}, // q
+ 108:Core/Src/n5110_driver.c ****  {0b01111100,0b00001000,0b00000100,0b00000100,0b00001000}, // r
+ 109:Core/Src/n5110_driver.c ****  {0b01001000,0b01010100,0b01010100,0b01010100,0b00100000}, // s
+ 110:Core/Src/n5110_driver.c ****  {0b00000100,0b00111111,0b01000100,0b01000000,0b00100000}, // t
+ 111:Core/Src/n5110_driver.c ****  {0b00111100,0b01000000,0b01000000,0b00100000,0b01111100}, // u
+ 112:Core/Src/n5110_driver.c ****  {0b00011100,0b00100000,0b01000000,0b00100000,0b00011100}, // v
+ 113:Core/Src/n5110_driver.c ****  {0b00111100,0b01000000,0b00110000,0b01000000,0b00111100}, // w
+ 114:Core/Src/n5110_driver.c ****  {0b01000100,0b00101000,0b00010000,0b00101000,0b01000100}, // x
+ 115:Core/Src/n5110_driver.c ****  {0b00001100,0b01010000,0b01010000,0b01010000,0b00111100}, // y
+ 116:Core/Src/n5110_driver.c ****  {0b01000100,0b01100100,0b01010100,0b01001100,0b01000100}, // z
+ 117:Core/Src/n5110_driver.c ****  {0b00000000,0b00001000,0b00110110,0b01000001,0b00000000}, // {
+ 118:Core/Src/n5110_driver.c ****  {0b00000000,0b00000000,0b01111111,0b00000000,0b00000000}, // |
+ 119:Core/Src/n5110_driver.c ****  {0b00000000,0b01000001,0b00110110,0b00001000,0b00000000}, // }
+ 120:Core/Src/n5110_driver.c ****  {0b00001000,0b00000100,0b00000100,0b00001000,0b00000100}  // ~
+ 121:Core/Src/n5110_driver.c **** };
+ 122:Core/Src/n5110_driver.c **** 
+ 123:Core/Src/n5110_driver.c **** static uint8_t screen_buffer[SCREEN_WIDTH][SCREEN_HEIGHT/8]; //screen buffer
+ 124:Core/Src/n5110_driver.c **** 
+ 125:Core/Src/n5110_driver.c **** //initialize display
+ 126:Core/Src/n5110_driver.c **** void init_n5110() {
+ 127:Core/Src/n5110_driver.c **** 
+ 128:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(SCE_PORT, SCE, 1); //set SCE to high to make sure display driver doesnt accept i
+ 129:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(VCC_PORT, VCC, 1); //turn on display driver
+ 130:Core/Src/n5110_driver.c **** 
+ 131:Core/Src/n5110_driver.c **** 	//briefly set rst pint to 0 to reset display driver
+ 132:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(RST_PORT, RST, 1);
+ 133:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 134:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(RST_PORT, RST, 0);
+ 135:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 136:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(RST_PORT, RST, 1);
+ 137:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 138:Core/Src/n5110_driver.c **** 
+ 139:Core/Src/n5110_driver.c **** 	//test display led
+ 140:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(LED_PORT, LED, 1);
  141:Core/Src/n5110_driver.c **** 
- 142:Core/Src/n5110_driver.c **** 	//function set PD=0, V=0, H=0 (normal instruction set)
- 143:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
- 139              		.loc 1 143 2 view .LVU19
- 140 00ac 0022     		movs	r2, #0
- 141 00ae 0821     		movs	r1, #8
- 142 00b0 2046     		mov	r0, r4
- 143 00b2 FFF7FEFF 		bl	HAL_GPIO_WritePin
-ARM GAS  /tmp/ccIxc9Ce.s 			page 6
+ 142:Core/Src/n5110_driver.c **** 	uint8_t init_display_instructions[] = {0b00100001,	//function set PD=0, V=0, H=1 (extended instruc
+ 143:Core/Src/n5110_driver.c **** 										   0b11010000,	//set Vop to +80 * b[V]
+ 144:Core/Src/n5110_driver.c **** 										   0b00100000,	//function set PD=0, V=0, H=0 (normal instruction set)
+ 145:Core/Src/n5110_driver.c **** 										   0b00001100}; //display control set normal mode (D=1, E=0)
+ARM GAS  /tmp/ccVG0MLh.s 			page 4
 
 
- 144              	.LVL16:
- 144:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &init_display_instructions[2], 1, 10);
- 145              		.loc 1 144 2 view .LVU20
- 146 00b6 0A23     		movs	r3, #10
- 147 00b8 0122     		movs	r2, #1
- 148 00ba 0DF10601 		add	r1, sp, #6
- 149 00be 2846     		mov	r0, r5
- 150 00c0 FFF7FEFF 		bl	HAL_SPI_Transmit
- 151              	.LVL17:
- 145:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
- 152              		.loc 1 145 2 view .LVU21
- 153 00c4 0122     		movs	r2, #1
- 154 00c6 0821     		movs	r1, #8
- 155 00c8 2046     		mov	r0, r4
- 156 00ca FFF7FEFF 		bl	HAL_GPIO_WritePin
- 157              	.LVL18:
  146:Core/Src/n5110_driver.c **** 
- 147:Core/Src/n5110_driver.c **** 	//display control set inverse mode (D=1, E=0)
- 148:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
- 158              		.loc 1 148 2 view .LVU22
- 159 00ce 0022     		movs	r2, #0
- 160 00d0 0821     		movs	r1, #8
- 161 00d2 2046     		mov	r0, r4
- 162 00d4 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 163              	.LVL19:
- 149:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &init_display_instructions[3], 1, 10);
- 164              		.loc 1 149 2 view .LVU23
- 165 00d8 0A23     		movs	r3, #10
- 166 00da 0122     		movs	r2, #1
- 167 00dc 0DF10701 		add	r1, sp, #7
- 168 00e0 2846     		mov	r0, r5
- 169 00e2 FFF7FEFF 		bl	HAL_SPI_Transmit
- 170              	.LVL20:
- 150:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
- 171              		.loc 1 150 2 view .LVU24
- 172 00e6 0122     		movs	r2, #1
- 173 00e8 0821     		movs	r1, #8
- 174 00ea 2046     		mov	r0, r4
- 175 00ec FFF7FEFF 		bl	HAL_GPIO_WritePin
- 176              	.LVL21:
+ 147:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[0], COMMAND);
+ 148:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[1], COMMAND);
+ 149:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[2], COMMAND);
+ 150:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[3], COMMAND);
  151:Core/Src/n5110_driver.c **** 
  152:Core/Src/n5110_driver.c **** 	return;
- 177              		.loc 1 152 2 view .LVU25
  153:Core/Src/n5110_driver.c **** }
- 178              		.loc 1 153 1 is_stmt 0 view .LVU26
- 179 00f0 03B0     		add	sp, sp, #12
- 180              	.LCFI2:
- 181              		.cfi_def_cfa_offset 12
- 182              		@ sp needed
- 183 00f2 30BD     		pop	{r4, r5, pc}
- 184              	.L4:
- 185              		.align	2
- 186              	.L3:
- 187 00f4 00080140 		.word	1073809408
- 188 00f8 000C0140 		.word	1073810432
- 189 00fc 21D0200C 		.word	203477025
- 190 0100 00000000 		.word	hspi1
-ARM GAS  /tmp/ccIxc9Ce.s 			page 7
-
-
- 191              		.cfi_endproc
- 192              	.LFE65:
- 194              		.section	.text.spi_tx_byte,"ax",%progbits
- 195              		.align	1
- 196              		.global	spi_tx_byte
- 197              		.syntax unified
- 198              		.thumb
- 199              		.thumb_func
- 200              		.fpu softvfp
- 202              	spi_tx_byte:
- 203              	.LVL22:
- 204              	.LFB66:
  154:Core/Src/n5110_driver.c **** 
- 155:Core/Src/n5110_driver.c **** void spi_tx_byte(uint8_t byte, int dc) {
- 205              		.loc 1 155 40 is_stmt 1 view -0
- 206              		.cfi_startproc
- 207              		@ args = 0, pretend = 0, frame = 8
- 208              		@ frame_needed = 0, uses_anonymous_args = 0
- 209              		.loc 1 155 40 is_stmt 0 view .LVU28
- 210 0000 10B5     		push	{r4, lr}
- 211              	.LCFI3:
- 212              		.cfi_def_cfa_offset 8
- 213              		.cfi_offset 4, -8
- 214              		.cfi_offset 14, -4
- 215 0002 82B0     		sub	sp, sp, #8
- 216              	.LCFI4:
- 217              		.cfi_def_cfa_offset 16
- 218 0004 8DF80700 		strb	r0, [sp, #7]
- 156:Core/Src/n5110_driver.c **** 	if(dc == DATA)
- 219              		.loc 1 156 2 is_stmt 1 view .LVU29
- 220              		.loc 1 156 4 is_stmt 0 view .LVU30
- 221 0008 39B1     		cbz	r1, .L10
- 157:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(GPIOA, DC_Pin, 1); //set DC to high to specify data
- 158:Core/Src/n5110_driver.c **** 	else if(dc == COMMAND)
- 222              		.loc 1 158 7 is_stmt 1 view .LVU31
- 223              		.loc 1 158 9 is_stmt 0 view .LVU32
- 224 000a 0129     		cmp	r1, #1
- 225 000c 1CD1     		bne	.L5
- 159:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(GPIOA, DC_Pin, 0); //set DC to low to specifiy command
- 226              		.loc 1 159 3 is_stmt 1 view .LVU33
- 227 000e 0022     		movs	r2, #0
- 228 0010 4021     		movs	r1, #64
- 229              	.LVL23:
- 230              		.loc 1 159 3 is_stmt 0 view .LVU34
- 231 0012 0E48     		ldr	r0, .L11
- 232              	.LVL24:
- 233              		.loc 1 159 3 view .LVU35
- 234 0014 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 235              	.LVL25:
- 236              		.loc 1 159 3 view .LVU36
- 237 0018 04E0     		b	.L7
- 238              	.LVL26:
- 239              	.L10:
- 157:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(GPIOA, DC_Pin, 1); //set DC to high to specify data
- 240              		.loc 1 157 3 is_stmt 1 view .LVU37
- 241 001a 0122     		movs	r2, #1
- 242 001c 4021     		movs	r1, #64
-ARM GAS  /tmp/ccIxc9Ce.s 			page 8
+ 155:Core/Src/n5110_driver.c **** 
+ 156:Core/Src/n5110_driver.c **** //write a byte to display
+ 157:Core/Src/n5110_driver.c **** void spi_tx_byte(uint8_t byte, int dc) {
+  28              		.loc 1 157 40 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 8
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		.loc 1 157 40 is_stmt 0 view .LVU1
+  33 0000 10B5     		push	{r4, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+  36              		.cfi_offset 4, -8
+  37              		.cfi_offset 14, -4
+  38 0002 82B0     		sub	sp, sp, #8
+  39              	.LCFI1:
+  40              		.cfi_def_cfa_offset 16
+  41 0004 8DF80700 		strb	r0, [sp, #7]
+ 158:Core/Src/n5110_driver.c **** 	if(dc == DATA)
+  42              		.loc 1 158 2 is_stmt 1 view .LVU2
+  43              		.loc 1 158 4 is_stmt 0 view .LVU3
+  44 0008 39B1     		cbz	r1, .L6
+ 159:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
+ 160:Core/Src/n5110_driver.c **** 	else if(dc == COMMAND)
+  45              		.loc 1 160 7 is_stmt 1 view .LVU4
+  46              		.loc 1 160 9 is_stmt 0 view .LVU5
+  47 000a 0129     		cmp	r1, #1
+  48 000c 1CD1     		bne	.L1
+ 161:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(DC_PORT, DC, 0); //set DC to low to specifiy command
+  49              		.loc 1 161 3 is_stmt 1 view .LVU6
+  50 000e 0022     		movs	r2, #0
+  51 0010 4021     		movs	r1, #64
+  52              	.LVL1:
+  53              		.loc 1 161 3 is_stmt 0 view .LVU7
+  54 0012 0E48     		ldr	r0, .L7
+  55              	.LVL2:
+  56              		.loc 1 161 3 view .LVU8
+  57 0014 FFF7FEFF 		bl	HAL_GPIO_WritePin
+  58              	.LVL3:
+  59              		.loc 1 161 3 view .LVU9
+  60 0018 04E0     		b	.L3
+  61              	.LVL4:
+  62              	.L6:
+ 159:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
+  63              		.loc 1 159 3 is_stmt 1 view .LVU10
+  64 001a 0122     		movs	r2, #1
+  65 001c 4021     		movs	r1, #64
+  66              	.LVL5:
+ 159:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
+ARM GAS  /tmp/ccVG0MLh.s 			page 5
 
 
- 243              	.LVL27:
- 157:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(GPIOA, DC_Pin, 1); //set DC to high to specify data
- 244              		.loc 1 157 3 is_stmt 0 view .LVU38
- 245 001e 0B48     		ldr	r0, .L11
- 246              	.LVL28:
- 157:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(GPIOA, DC_Pin, 1); //set DC to high to specify data
- 247              		.loc 1 157 3 view .LVU39
- 248 0020 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 249              	.LVL29:
- 250              	.L7:
- 160:Core/Src/n5110_driver.c **** 	else
- 161:Core/Src/n5110_driver.c **** 		return;
- 162:Core/Src/n5110_driver.c **** 
- 163:Core/Src/n5110_driver.c **** 
- 164:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
- 251              		.loc 1 164 2 is_stmt 1 view .LVU40
- 252 0024 094C     		ldr	r4, .L11
- 253 0026 0022     		movs	r2, #0
- 254 0028 0821     		movs	r1, #8
- 255 002a 2046     		mov	r0, r4
- 256 002c FFF7FEFF 		bl	HAL_GPIO_WritePin
- 257              	.LVL30:
- 165:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &byte, 1, 10);
- 258              		.loc 1 165 2 view .LVU41
- 259 0030 0A23     		movs	r3, #10
- 260 0032 0122     		movs	r2, #1
- 261 0034 0DF10701 		add	r1, sp, #7
- 262 0038 0548     		ldr	r0, .L11+4
- 263 003a FFF7FEFF 		bl	HAL_SPI_Transmit
- 264              	.LVL31:
- 166:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
- 265              		.loc 1 166 2 view .LVU42
- 266 003e 0122     		movs	r2, #1
- 267 0040 0821     		movs	r1, #8
- 268 0042 2046     		mov	r0, r4
- 269 0044 FFF7FEFF 		bl	HAL_GPIO_WritePin
- 270              	.LVL32:
- 167:Core/Src/n5110_driver.c **** 	return;
- 271              		.loc 1 167 2 view .LVU43
- 272              	.L5:
- 168:Core/Src/n5110_driver.c **** }
- 273              		.loc 1 168 1 is_stmt 0 view .LVU44
- 274 0048 02B0     		add	sp, sp, #8
- 275              	.LCFI5:
- 276              		.cfi_def_cfa_offset 8
- 277              		@ sp needed
- 278 004a 10BD     		pop	{r4, pc}
- 279              	.L12:
- 280              		.align	2
- 281              	.L11:
- 282 004c 00080140 		.word	1073809408
- 283 0050 00000000 		.word	hspi1
- 284              		.cfi_endproc
- 285              	.LFE66:
- 287              		.section	.text.clear_screen,"ax",%progbits
- 288              		.align	1
- 289              		.global	clear_screen
-ARM GAS  /tmp/ccIxc9Ce.s 			page 9
+  67              		.loc 1 159 3 is_stmt 0 view .LVU11
+  68 001e 0B48     		ldr	r0, .L7
+  69              	.LVL6:
+ 159:Core/Src/n5110_driver.c **** 		HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
+  70              		.loc 1 159 3 view .LVU12
+  71 0020 FFF7FEFF 		bl	HAL_GPIO_WritePin
+  72              	.LVL7:
+  73              	.L3:
+ 162:Core/Src/n5110_driver.c **** 	else
+ 163:Core/Src/n5110_driver.c **** 		return;
+ 164:Core/Src/n5110_driver.c **** 
+ 165:Core/Src/n5110_driver.c **** 
+ 166:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(SCE_PORT, SCE, 0);
+  74              		.loc 1 166 2 is_stmt 1 view .LVU13
+  75 0024 094C     		ldr	r4, .L7
+  76 0026 0022     		movs	r2, #0
+  77 0028 0821     		movs	r1, #8
+  78 002a 2046     		mov	r0, r4
+  79 002c FFF7FEFF 		bl	HAL_GPIO_WritePin
+  80              	.LVL8:
+ 167:Core/Src/n5110_driver.c **** 	HAL_SPI_Transmit(&hspi1, &byte, 1, 10);
+  81              		.loc 1 167 2 view .LVU14
+  82 0030 0A23     		movs	r3, #10
+  83 0032 0122     		movs	r2, #1
+  84 0034 0DF10701 		add	r1, sp, #7
+  85 0038 0548     		ldr	r0, .L7+4
+  86 003a FFF7FEFF 		bl	HAL_SPI_Transmit
+  87              	.LVL9:
+ 168:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(SCE_PORT, SCE, 1);
+  88              		.loc 1 168 2 view .LVU15
+  89 003e 0122     		movs	r2, #1
+  90 0040 0821     		movs	r1, #8
+  91 0042 2046     		mov	r0, r4
+  92 0044 FFF7FEFF 		bl	HAL_GPIO_WritePin
+  93              	.LVL10:
+ 169:Core/Src/n5110_driver.c **** 	return;
+  94              		.loc 1 169 2 view .LVU16
+  95              	.L1:
+ 170:Core/Src/n5110_driver.c **** }
+  96              		.loc 1 170 1 is_stmt 0 view .LVU17
+  97 0048 02B0     		add	sp, sp, #8
+  98              	.LCFI2:
+  99              		.cfi_def_cfa_offset 8
+ 100              		@ sp needed
+ 101 004a 10BD     		pop	{r4, pc}
+ 102              	.L8:
+ 103              		.align	2
+ 104              	.L7:
+ 105 004c 00080140 		.word	1073809408
+ 106 0050 00000000 		.word	hspi1
+ 107              		.cfi_endproc
+ 108              	.LFE66:
+ 110              		.section	.text.init_n5110,"ax",%progbits
+ 111              		.align	1
+ 112              		.global	init_n5110
+ 113              		.syntax unified
+ 114              		.thumb
+ARM GAS  /tmp/ccVG0MLh.s 			page 6
 
 
- 290              		.syntax unified
- 291              		.thumb
- 292              		.thumb_func
- 293              		.fpu softvfp
- 295              	clear_screen:
- 296              	.LFB67:
- 169:Core/Src/n5110_driver.c **** 
- 170:Core/Src/n5110_driver.c **** void clear_screen() {
- 297              		.loc 1 170 21 is_stmt 1 view -0
- 298              		.cfi_startproc
- 299              		@ args = 0, pretend = 0, frame = 0
- 300              		@ frame_needed = 0, uses_anonymous_args = 0
- 301 0000 10B5     		push	{r4, lr}
- 302              	.LCFI6:
- 303              		.cfi_def_cfa_offset 8
- 304              		.cfi_offset 4, -8
- 305              		.cfi_offset 14, -4
- 171:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
- 306              		.loc 1 171 2 view .LVU46
- 307              	.LBB2:
- 308              		.loc 1 171 6 view .LVU47
- 309              	.LVL33:
- 310              		.loc 1 171 10 is_stmt 0 view .LVU48
- 311 0002 0024     		movs	r4, #0
- 312              		.loc 1 171 2 view .LVU49
- 313 0004 04E0     		b	.L14
- 314              	.LVL34:
- 315              	.L15:
- 172:Core/Src/n5110_driver.c **** 		spi_tx_byte(0, DATA);
- 316              		.loc 1 172 3 is_stmt 1 discriminator 3 view .LVU50
- 317 0006 0021     		movs	r1, #0
- 318 0008 0846     		mov	r0, r1
- 319 000a FFF7FEFF 		bl	spi_tx_byte
- 320              	.LVL35:
- 171:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
- 321              		.loc 1 171 30 discriminator 3 view .LVU51
- 171:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
- 322              		.loc 1 171 31 is_stmt 0 discriminator 3 view .LVU52
- 323 000e 0134     		adds	r4, r4, #1
- 324              	.LVL36:
- 325              	.L14:
- 171:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
- 326              		.loc 1 171 17 is_stmt 1 discriminator 1 view .LVU53
- 171:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
- 327              		.loc 1 171 2 is_stmt 0 discriminator 1 view .LVU54
- 328 0010 B4F57C6F 		cmp	r4, #4032
- 329 0014 F7DB     		blt	.L15
- 330              	.LBE2:
- 173:Core/Src/n5110_driver.c **** 	}
- 174:Core/Src/n5110_driver.c **** 	return;
- 175:Core/Src/n5110_driver.c **** }
- 331              		.loc 1 175 1 view .LVU55
- 332 0016 10BD     		pop	{r4, pc}
- 333              		.loc 1 175 1 view .LVU56
- 334              		.cfi_endproc
- 335              	.LFE67:
- 337              		.section	.text.write_char,"ax",%progbits
-ARM GAS  /tmp/ccIxc9Ce.s 			page 10
+ 115              		.thumb_func
+ 116              		.fpu softvfp
+ 118              	init_n5110:
+ 119              	.LFB65:
+ 126:Core/Src/n5110_driver.c **** 
+ 120              		.loc 1 126 19 is_stmt 1 view -0
+ 121              		.cfi_startproc
+ 122              		@ args = 0, pretend = 0, frame = 8
+ 123              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124 0000 30B5     		push	{r4, r5, lr}
+ 125              	.LCFI3:
+ 126              		.cfi_def_cfa_offset 12
+ 127              		.cfi_offset 4, -12
+ 128              		.cfi_offset 5, -8
+ 129              		.cfi_offset 14, -4
+ 130 0002 83B0     		sub	sp, sp, #12
+ 131              	.LCFI4:
+ 132              		.cfi_def_cfa_offset 24
+ 128:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(VCC_PORT, VCC, 1); //turn on display driver
+ 133              		.loc 1 128 2 view .LVU19
+ 134 0004 1F4C     		ldr	r4, .L11
+ 135 0006 0122     		movs	r2, #1
+ 136 0008 0821     		movs	r1, #8
+ 137 000a 2046     		mov	r0, r4
+ 138 000c FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 139              	.LVL11:
+ 129:Core/Src/n5110_driver.c **** 
+ 140              		.loc 1 129 2 view .LVU20
+ 141 0010 1D4D     		ldr	r5, .L11+4
+ 142 0012 0122     		movs	r2, #1
+ 143 0014 4FF40061 		mov	r1, #2048
+ 144 0018 2846     		mov	r0, r5
+ 145 001a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 146              	.LVL12:
+ 132:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 147              		.loc 1 132 2 view .LVU21
+ 148 001e 0122     		movs	r2, #1
+ 149 0020 1021     		movs	r1, #16
+ 150 0022 2046     		mov	r0, r4
+ 151 0024 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 152              	.LVL13:
+ 133:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(RST_PORT, RST, 0);
+ 153              		.loc 1 133 2 view .LVU22
+ 154 0028 0A20     		movs	r0, #10
+ 155 002a FFF7FEFF 		bl	HAL_Delay
+ 156              	.LVL14:
+ 134:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 157              		.loc 1 134 2 view .LVU23
+ 158 002e 0022     		movs	r2, #0
+ 159 0030 1021     		movs	r1, #16
+ 160 0032 2046     		mov	r0, r4
+ 161 0034 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 162              	.LVL15:
+ 135:Core/Src/n5110_driver.c **** 	HAL_GPIO_WritePin(RST_PORT, RST, 1);
+ 163              		.loc 1 135 2 view .LVU24
+ 164 0038 0A20     		movs	r0, #10
+ 165 003a FFF7FEFF 		bl	HAL_Delay
+ARM GAS  /tmp/ccVG0MLh.s 			page 7
 
 
- 338              		.align	1
- 339              		.global	write_char
- 340              		.syntax unified
- 341              		.thumb
- 342              		.thumb_func
- 343              		.fpu softvfp
- 345              	write_char:
- 346              	.LVL37:
- 347              	.LFB68:
- 176:Core/Src/n5110_driver.c **** 
- 177:Core/Src/n5110_driver.c **** void write_char(char character) {
- 348              		.loc 1 177 33 is_stmt 1 view -0
- 349              		.cfi_startproc
- 350              		@ args = 0, pretend = 0, frame = 0
- 351              		@ frame_needed = 0, uses_anonymous_args = 0
- 352              		.loc 1 177 33 is_stmt 0 view .LVU58
- 353 0000 38B5     		push	{r3, r4, r5, lr}
- 354              	.LCFI7:
- 355              		.cfi_def_cfa_offset 16
- 356              		.cfi_offset 3, -16
- 357              		.cfi_offset 4, -12
- 358              		.cfi_offset 5, -8
- 359              		.cfi_offset 14, -4
- 360 0002 0546     		mov	r5, r0
- 178:Core/Src/n5110_driver.c **** 	int column;
- 361              		.loc 1 178 2 is_stmt 1 view .LVU59
- 179:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
- 362              		.loc 1 179 2 view .LVU60
- 363              	.LVL38:
- 364              		.loc 1 179 13 is_stmt 0 view .LVU61
- 365 0004 0024     		movs	r4, #0
- 366              		.loc 1 179 2 view .LVU62
- 367 0006 0AE0     		b	.L18
- 368              	.LVL39:
- 369              	.L19:
- 180:Core/Src/n5110_driver.c **** 		spi_tx_byte(FONT_7x5[character-32][column], DATA);
- 370              		.loc 1 180 3 is_stmt 1 discriminator 3 view .LVU63
- 371              		.loc 1 180 33 is_stmt 0 discriminator 3 view .LVU64
- 372 0008 A5F12003 		sub	r3, r5, #32
- 373              		.loc 1 180 37 discriminator 3 view .LVU65
- 374 000c 03EB8303 		add	r3, r3, r3, lsl #2
- 375 0010 064A     		ldr	r2, .L21
- 376 0012 1344     		add	r3, r3, r2
- 377              		.loc 1 180 3 discriminator 3 view .LVU66
- 378 0014 0021     		movs	r1, #0
- 379 0016 185D     		ldrb	r0, [r3, r4]	@ zero_extendqisi2
- 380 0018 FFF7FEFF 		bl	spi_tx_byte
- 381              	.LVL40:
- 179:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
- 382              		.loc 1 179 30 is_stmt 1 discriminator 3 view .LVU67
- 179:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
- 383              		.loc 1 179 36 is_stmt 0 discriminator 3 view .LVU68
- 384 001c 0134     		adds	r4, r4, #1
- 385              	.LVL41:
- 386              	.L18:
- 179:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
- 387              		.loc 1 179 18 is_stmt 1 discriminator 1 view .LVU69
-ARM GAS  /tmp/ccIxc9Ce.s 			page 11
+ 166              	.LVL16:
+ 136:Core/Src/n5110_driver.c **** 	HAL_Delay(10);
+ 167              		.loc 1 136 2 view .LVU25
+ 168 003e 0122     		movs	r2, #1
+ 169 0040 1021     		movs	r1, #16
+ 170 0042 2046     		mov	r0, r4
+ 171 0044 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 172              	.LVL17:
+ 137:Core/Src/n5110_driver.c **** 
+ 173              		.loc 1 137 2 view .LVU26
+ 174 0048 0A20     		movs	r0, #10
+ 175 004a FFF7FEFF 		bl	HAL_Delay
+ 176              	.LVL18:
+ 140:Core/Src/n5110_driver.c **** 
+ 177              		.loc 1 140 2 view .LVU27
+ 178 004e 0122     		movs	r2, #1
+ 179 0050 4FF48061 		mov	r1, #1024
+ 180 0054 2846     		mov	r0, r5
+ 181 0056 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 182              	.LVL19:
+ 142:Core/Src/n5110_driver.c **** 										   0b11010000,	//set Vop to +80 * b[V]
+ 183              		.loc 1 142 2 view .LVU28
+ 142:Core/Src/n5110_driver.c **** 										   0b11010000,	//set Vop to +80 * b[V]
+ 184              		.loc 1 142 10 is_stmt 0 view .LVU29
+ 185 005a 0C4B     		ldr	r3, .L11+8
+ 186 005c 0193     		str	r3, [sp, #4]
+ 147:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[1], COMMAND);
+ 187              		.loc 1 147 2 is_stmt 1 view .LVU30
+ 188 005e 0121     		movs	r1, #1
+ 189 0060 2120     		movs	r0, #33
+ 190 0062 FFF7FEFF 		bl	spi_tx_byte
+ 191              	.LVL20:
+ 148:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[2], COMMAND);
+ 192              		.loc 1 148 2 view .LVU31
+ 193 0066 0121     		movs	r1, #1
+ 194 0068 D020     		movs	r0, #208
+ 195 006a FFF7FEFF 		bl	spi_tx_byte
+ 196              	.LVL21:
+ 149:Core/Src/n5110_driver.c **** 	spi_tx_byte(init_display_instructions[3], COMMAND);
+ 197              		.loc 1 149 2 view .LVU32
+ 198 006e 0121     		movs	r1, #1
+ 199 0070 2020     		movs	r0, #32
+ 200 0072 FFF7FEFF 		bl	spi_tx_byte
+ 201              	.LVL22:
+ 150:Core/Src/n5110_driver.c **** 
+ 202              		.loc 1 150 2 view .LVU33
+ 203 0076 0121     		movs	r1, #1
+ 204 0078 0C20     		movs	r0, #12
+ 205 007a FFF7FEFF 		bl	spi_tx_byte
+ 206              	.LVL23:
+ 152:Core/Src/n5110_driver.c **** }
+ 207              		.loc 1 152 2 view .LVU34
+ 153:Core/Src/n5110_driver.c **** 
+ 208              		.loc 1 153 1 is_stmt 0 view .LVU35
+ 209 007e 03B0     		add	sp, sp, #12
+ 210              	.LCFI5:
+ 211              		.cfi_def_cfa_offset 12
+ARM GAS  /tmp/ccVG0MLh.s 			page 8
 
 
- 179:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
- 388              		.loc 1 179 2 is_stmt 0 discriminator 1 view .LVU70
- 389 001e 042C     		cmp	r4, #4
- 390 0020 F2DD     		ble	.L19
- 181:Core/Src/n5110_driver.c **** 	}
- 182:Core/Src/n5110_driver.c **** 	spi_tx_byte(0, DATA); //add empty column for spacing between characters
- 391              		.loc 1 182 2 is_stmt 1 view .LVU71
- 392 0022 0021     		movs	r1, #0
- 393 0024 0846     		mov	r0, r1
- 394 0026 FFF7FEFF 		bl	spi_tx_byte
- 395              	.LVL42:
- 183:Core/Src/n5110_driver.c **** 	return;
- 396              		.loc 1 183 2 view .LVU72
- 184:Core/Src/n5110_driver.c **** }
- 397              		.loc 1 184 1 is_stmt 0 view .LVU73
- 398 002a 38BD     		pop	{r3, r4, r5, pc}
- 399              	.LVL43:
- 400              	.L22:
- 401              		.loc 1 184 1 view .LVU74
- 402              		.align	2
- 403              	.L21:
- 404 002c 00000000 		.word	.LANCHOR0
- 405              		.cfi_endproc
- 406              	.LFE68:
- 408              		.section	.text.set_draw_coordinates,"ax",%progbits
- 409              		.align	1
- 410              		.global	set_draw_coordinates
- 411              		.syntax unified
- 412              		.thumb
- 413              		.thumb_func
- 414              		.fpu softvfp
- 416              	set_draw_coordinates:
- 417              	.LVL44:
- 418              	.LFB69:
- 185:Core/Src/n5110_driver.c **** 
- 186:Core/Src/n5110_driver.c **** 
- 187:Core/Src/n5110_driver.c **** //move the draw cursor to x,y with 0<=x<=83 and 0<=y<=5
- 188:Core/Src/n5110_driver.c **** //every y increment represents 8 pixels, thus y=5 means that the cursor is on the bottom row of 8 p
- 189:Core/Src/n5110_driver.c **** void set_draw_coordinates(int x, int y) {
- 419              		.loc 1 189 41 is_stmt 1 view -0
- 420              		.cfi_startproc
- 421              		@ args = 0, pretend = 0, frame = 0
- 422              		@ frame_needed = 0, uses_anonymous_args = 0
- 190:Core/Src/n5110_driver.c **** 	if(x<0 || x>83 || y<0 || y>5) {
- 423              		.loc 1 190 2 view .LVU76
- 424              		.loc 1 190 4 is_stmt 0 view .LVU77
- 425 0000 5328     		cmp	r0, #83
- 426 0002 03D8     		bhi	.L26
- 427              		.loc 1 190 17 discriminator 1 view .LVU78
- 428 0004 0029     		cmp	r1, #0
- 429 0006 01DB     		blt	.L26
- 430              		.loc 1 190 24 discriminator 2 view .LVU79
- 431 0008 0529     		cmp	r1, #5
- 432 000a 00DD     		ble	.L29
- 433              	.L26:
- 434 000c 7047     		bx	lr
- 435              	.L29:
-ARM GAS  /tmp/ccIxc9Ce.s 			page 12
+ 212              		@ sp needed
+ 213 0080 30BD     		pop	{r4, r5, pc}
+ 214              	.L12:
+ 215 0082 00BF     		.align	2
+ 216              	.L11:
+ 217 0084 00080140 		.word	1073809408
+ 218 0088 000C0140 		.word	1073810432
+ 219 008c 21D0200C 		.word	203477025
+ 220              		.cfi_endproc
+ 221              	.LFE65:
+ 223              		.section	.text.clear_screen,"ax",%progbits
+ 224              		.align	1
+ 225              		.global	clear_screen
+ 226              		.syntax unified
+ 227              		.thumb
+ 228              		.thumb_func
+ 229              		.fpu softvfp
+ 231              	clear_screen:
+ 232              	.LFB67:
+ 171:Core/Src/n5110_driver.c **** 
+ 172:Core/Src/n5110_driver.c **** //clears screen, does not move cursor
+ 173:Core/Src/n5110_driver.c **** void clear_screen() {
+ 233              		.loc 1 173 21 is_stmt 1 view -0
+ 234              		.cfi_startproc
+ 235              		@ args = 0, pretend = 0, frame = 0
+ 236              		@ frame_needed = 0, uses_anonymous_args = 0
+ 237 0000 10B5     		push	{r4, lr}
+ 238              	.LCFI6:
+ 239              		.cfi_def_cfa_offset 8
+ 240              		.cfi_offset 4, -8
+ 241              		.cfi_offset 14, -4
+ 174:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
+ 242              		.loc 1 174 2 view .LVU37
+ 243              	.LBB2:
+ 244              		.loc 1 174 6 view .LVU38
+ 245              	.LVL24:
+ 246              		.loc 1 174 10 is_stmt 0 view .LVU39
+ 247 0002 0024     		movs	r4, #0
+ 248              		.loc 1 174 2 view .LVU40
+ 249 0004 04E0     		b	.L14
+ 250              	.LVL25:
+ 251              	.L15:
+ 175:Core/Src/n5110_driver.c **** 		spi_tx_byte(0, DATA);
+ 252              		.loc 1 175 3 is_stmt 1 discriminator 3 view .LVU41
+ 253 0006 0021     		movs	r1, #0
+ 254 0008 0846     		mov	r0, r1
+ 255 000a FFF7FEFF 		bl	spi_tx_byte
+ 256              	.LVL26:
+ 174:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
+ 257              		.loc 1 174 30 discriminator 3 view .LVU42
+ 174:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
+ 258              		.loc 1 174 31 is_stmt 0 discriminator 3 view .LVU43
+ 259 000e 0134     		adds	r4, r4, #1
+ 260              	.LVL27:
+ 261              	.L14:
+ 174:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
+ 262              		.loc 1 174 17 is_stmt 1 discriminator 1 view .LVU44
+ARM GAS  /tmp/ccVG0MLh.s 			page 9
 
 
- 189:Core/Src/n5110_driver.c **** 	if(x<0 || x>83 || y<0 || y>5) {
- 436              		.loc 1 189 41 view .LVU80
- 437 000e 10B5     		push	{r4, lr}
- 438              	.LCFI8:
- 439              		.cfi_def_cfa_offset 8
- 440              		.cfi_offset 4, -8
- 441              		.cfi_offset 14, -4
- 191:Core/Src/n5110_driver.c **** 		return;
- 192:Core/Src/n5110_driver.c **** 	}
- 193:Core/Src/n5110_driver.c **** 	uint8_t x_command = 0b10000000;
- 442              		.loc 1 193 2 is_stmt 1 view .LVU81
- 443              	.LVL45:
- 194:Core/Src/n5110_driver.c **** 	uint8_t y_command = 0b01000000;
- 444              		.loc 1 194 2 view .LVU82
- 195:Core/Src/n5110_driver.c **** 	x_command += x;
- 445              		.loc 1 195 2 view .LVU83
- 446              		.loc 1 195 12 is_stmt 0 view .LVU84
- 447 0010 8038     		subs	r0, r0, #128
- 448              	.LVL46:
- 196:Core/Src/n5110_driver.c **** 	y_command += y;
- 449              		.loc 1 196 2 is_stmt 1 view .LVU85
- 450              		.loc 1 196 12 is_stmt 0 view .LVU86
- 451 0012 4031     		adds	r1, r1, #64
- 452              	.LVL47:
- 453              		.loc 1 196 12 view .LVU87
- 454 0014 CCB2     		uxtb	r4, r1
- 455              	.LVL48:
- 197:Core/Src/n5110_driver.c **** 	spi_tx_byte(x_command, COMMAND);
- 456              		.loc 1 197 2 is_stmt 1 view .LVU88
- 457 0016 0121     		movs	r1, #1
- 458              	.LVL49:
- 459              		.loc 1 197 2 is_stmt 0 view .LVU89
- 460 0018 C0B2     		uxtb	r0, r0
- 461              	.LVL50:
- 462              		.loc 1 197 2 view .LVU90
- 463 001a FFF7FEFF 		bl	spi_tx_byte
- 464              	.LVL51:
- 198:Core/Src/n5110_driver.c **** 	spi_tx_byte(y_command, COMMAND);
- 465              		.loc 1 198 2 is_stmt 1 view .LVU91
- 466 001e 0121     		movs	r1, #1
- 467 0020 2046     		mov	r0, r4
- 468 0022 FFF7FEFF 		bl	spi_tx_byte
- 469              	.LVL52:
- 199:Core/Src/n5110_driver.c **** }
- 470              		.loc 1 199 1 is_stmt 0 view .LVU92
- 471 0026 10BD     		pop	{r4, pc}
- 472              		.loc 1 199 1 view .LVU93
- 473              		.cfi_endproc
- 474              	.LFE69:
- 476              		.global	FONT_7x5
- 477              		.section	.data.FONT_7x5,"aw"
- 478              		.align	2
- 479              		.set	.LANCHOR0,. + 0
- 482              	FONT_7x5:
- 483 0000 00000000 		.ascii	"\000\000\000\000\000"
- 483      00
- 484 0005 00004F00 		.ascii	"\000\000O\000\000"
-ARM GAS  /tmp/ccIxc9Ce.s 			page 13
+ 174:Core/Src/n5110_driver.c **** 	for(int i = 0; i < (48*84); i++) {
+ 263              		.loc 1 174 2 is_stmt 0 discriminator 1 view .LVU45
+ 264 0010 B4F57C6F 		cmp	r4, #4032
+ 265 0014 F7DB     		blt	.L15
+ 266              	.LBE2:
+ 176:Core/Src/n5110_driver.c **** 	}
+ 177:Core/Src/n5110_driver.c **** 	return;
+ 178:Core/Src/n5110_driver.c **** }
+ 267              		.loc 1 178 1 view .LVU46
+ 268 0016 10BD     		pop	{r4, pc}
+ 269              		.loc 1 178 1 view .LVU47
+ 270              		.cfi_endproc
+ 271              	.LFE67:
+ 273              		.section	.text.write_screen_buffer,"ax",%progbits
+ 274              		.align	1
+ 275              		.global	write_screen_buffer
+ 276              		.syntax unified
+ 277              		.thumb
+ 278              		.thumb_func
+ 279              		.fpu softvfp
+ 281              	write_screen_buffer:
+ 282              	.LFB68:
+ 179:Core/Src/n5110_driver.c **** 
+ 180:Core/Src/n5110_driver.c **** void write_screen_buffer() {
+ 283              		.loc 1 180 28 is_stmt 1 view -0
+ 284              		.cfi_startproc
+ 285              		@ args = 0, pretend = 0, frame = 0
+ 286              		@ frame_needed = 0, uses_anonymous_args = 0
+ 287              		@ link register save eliminated.
+ 181:Core/Src/n5110_driver.c **** 	
+ 182:Core/Src/n5110_driver.c **** }
+ 288              		.loc 1 182 1 view .LVU49
+ 289 0000 7047     		bx	lr
+ 290              		.cfi_endproc
+ 291              	.LFE68:
+ 293              		.section	.text.write_char,"ax",%progbits
+ 294              		.align	1
+ 295              		.global	write_char
+ 296              		.syntax unified
+ 297              		.thumb
+ 298              		.thumb_func
+ 299              		.fpu softvfp
+ 301              	write_char:
+ 302              	.LVL28:
+ 303              	.LFB69:
+ 183:Core/Src/n5110_driver.c **** 
+ 184:Core/Src/n5110_driver.c **** void write_char(char character) {
+ 304              		.loc 1 184 33 view -0
+ 305              		.cfi_startproc
+ 306              		@ args = 0, pretend = 0, frame = 0
+ 307              		@ frame_needed = 0, uses_anonymous_args = 0
+ 308              		.loc 1 184 33 is_stmt 0 view .LVU51
+ 309 0000 38B5     		push	{r3, r4, r5, lr}
+ 310              	.LCFI7:
+ 311              		.cfi_def_cfa_offset 16
+ 312              		.cfi_offset 3, -16
+ 313              		.cfi_offset 4, -12
+ARM GAS  /tmp/ccVG0MLh.s 			page 10
 
 
- 484      00
- 485 000a 00070007 		.ascii	"\000\007\000\007\000"
- 485      00
- 486 000f 147F147F 		.ascii	"\024\177\024\177\024"
- 486      14
- 487 0014 242A7F2A 		.ascii	"$*\177*\022"
- 487      12
- 488 0019 23130864 		.ascii	"#\023\010db"
- 488      62
- 489 001e 36495522 		.ascii	"6IU\"P"
- 489      50
- 490 0023 00050300 		.ascii	"\000\005\003\000\000"
- 490      00
- 491 0028 001C2241 		.ascii	"\000\034\"A\000"
- 491      00
- 492 002d 0041221C 		.ascii	"\000A\"\034\000"
- 492      00
- 493 0032 14083E08 		.ascii	"\024\010>\010\024"
- 493      14
- 494 0037 08083E08 		.ascii	"\010\010>\010\010"
- 494      08
- 495 003c 00503000 		.ascii	"\000P0\000\000"
- 495      00
- 496 0041 08080808 		.ascii	"\010\010\010\010\010"
- 496      08
- 497 0046 00606000 		.ascii	"\000``\000\000"
- 497      00
- 498 004b 20100804 		.ascii	" \020\010\004\002"
- 498      02
- 499 0050 3E514945 		.ascii	">QIE>"
- 499      3E
- 500 0055 00427F40 		.ascii	"\000B\177@\000"
- 500      00
- 501 005a 42615149 		.ascii	"BaQIF"
- 501      46
- 502 005f 2141454B 		.ascii	"!AEK1"
- 502      31
- 503 0064 1814127F 		.ascii	"\030\024\022\177\020"
- 503      10
- 504 0069 27454545 		.ascii	"'EEE9"
- 504      39
- 505 006e 3C4A4949 		.ascii	"<JII0"
- 505      30
- 506 0073 03710905 		.ascii	"\003q\011\005\003"
- 506      03
- 507 0078 36494949 		.ascii	"6III6"
- 507      36
- 508 007d 06494929 		.ascii	"\006II)\036"
- 508      1E
- 509 0082 006C6C00 		.ascii	"\000ll\000\000"
- 509      00
- 510 0087 00563600 		.ascii	"\000V6\000\000"
- 510      00
- 511 008c 08142241 		.ascii	"\010\024\"A\000"
- 511      00
- 512 0091 14141414 		.ascii	"\024\024\024\024\024"
- 512      14
-ARM GAS  /tmp/ccIxc9Ce.s 			page 14
+ 314              		.cfi_offset 5, -8
+ 315              		.cfi_offset 14, -4
+ 316 0002 0546     		mov	r5, r0
+ 185:Core/Src/n5110_driver.c **** 	int column;
+ 317              		.loc 1 185 2 is_stmt 1 view .LVU52
+ 186:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
+ 318              		.loc 1 186 2 view .LVU53
+ 319              	.LVL29:
+ 320              		.loc 1 186 13 is_stmt 0 view .LVU54
+ 321 0004 0024     		movs	r4, #0
+ 322              		.loc 1 186 2 view .LVU55
+ 323 0006 0AE0     		b	.L19
+ 324              	.LVL30:
+ 325              	.L20:
+ 187:Core/Src/n5110_driver.c **** 		spi_tx_byte(FONT_7x5[character-32][column], DATA);
+ 326              		.loc 1 187 3 is_stmt 1 discriminator 3 view .LVU56
+ 327              		.loc 1 187 33 is_stmt 0 discriminator 3 view .LVU57
+ 328 0008 A5F12003 		sub	r3, r5, #32
+ 329              		.loc 1 187 37 discriminator 3 view .LVU58
+ 330 000c 03EB8303 		add	r3, r3, r3, lsl #2
+ 331 0010 064A     		ldr	r2, .L22
+ 332 0012 1344     		add	r3, r3, r2
+ 333              		.loc 1 187 3 discriminator 3 view .LVU59
+ 334 0014 0021     		movs	r1, #0
+ 335 0016 185D     		ldrb	r0, [r3, r4]	@ zero_extendqisi2
+ 336 0018 FFF7FEFF 		bl	spi_tx_byte
+ 337              	.LVL31:
+ 186:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
+ 338              		.loc 1 186 30 is_stmt 1 discriminator 3 view .LVU60
+ 186:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
+ 339              		.loc 1 186 36 is_stmt 0 discriminator 3 view .LVU61
+ 340 001c 0134     		adds	r4, r4, #1
+ 341              	.LVL32:
+ 342              	.L19:
+ 186:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
+ 343              		.loc 1 186 18 is_stmt 1 discriminator 1 view .LVU62
+ 186:Core/Src/n5110_driver.c **** 	for(column = 0; column < 5; column++) {
+ 344              		.loc 1 186 2 is_stmt 0 discriminator 1 view .LVU63
+ 345 001e 042C     		cmp	r4, #4
+ 346 0020 F2DD     		ble	.L20
+ 188:Core/Src/n5110_driver.c **** 	}
+ 189:Core/Src/n5110_driver.c **** 	spi_tx_byte(0, DATA); //add empty column for spacing between characters
+ 347              		.loc 1 189 2 is_stmt 1 view .LVU64
+ 348 0022 0021     		movs	r1, #0
+ 349 0024 0846     		mov	r0, r1
+ 350 0026 FFF7FEFF 		bl	spi_tx_byte
+ 351              	.LVL33:
+ 190:Core/Src/n5110_driver.c **** 	return;
+ 352              		.loc 1 190 2 view .LVU65
+ 191:Core/Src/n5110_driver.c **** }
+ 353              		.loc 1 191 1 is_stmt 0 view .LVU66
+ 354 002a 38BD     		pop	{r3, r4, r5, pc}
+ 355              	.LVL34:
+ 356              	.L23:
+ 357              		.loc 1 191 1 view .LVU67
+ 358              		.align	2
+ 359              	.L22:
+ARM GAS  /tmp/ccVG0MLh.s 			page 11
 
 
- 513 0096 00412214 		.ascii	"\000A\"\024\010"
- 513      08
- 514 009b 02015109 		.ascii	"\002\001Q\011\006"
- 514      06
- 515 00a0 32497941 		.ascii	"2IyA>"
- 515      3E
- 516 00a5 7E111111 		.ascii	"~\021\021\021~"
- 516      7E
- 517 00aa 7F494949 		.ascii	"\177III>"
- 517      3E
- 518 00af 3E414141 		.ascii	">AAA\""
- 518      22
- 519 00b4 7F414141 		.ascii	"\177AAA>"
- 519      3E
- 520 00b9 7F494949 		.ascii	"\177IIII"
- 520      49
- 521 00be 7F090909 		.ascii	"\177\011\011\011\001"
- 521      01
- 522 00c3 3E414949 		.ascii	">AII:"
- 522      3A
- 523 00c8 7F080808 		.ascii	"\177\010\010\010\177"
- 523      7F
- 524 00cd 41417F41 		.ascii	"AA\177AA"
- 524      41
- 525 00d2 3041413F 		.ascii	"0AA?\001"
- 525      01
- 526 00d7 7F081422 		.ascii	"\177\010\024\"A"
- 526      41
- 527 00dc 7F404040 		.ascii	"\177@@@@"
- 527      40
- 528 00e1 7F020C02 		.ascii	"\177\002\014\002\177"
- 528      7F
- 529 00e6 7F040810 		.ascii	"\177\004\010\020\177"
- 529      7F
- 530 00eb 3E414141 		.ascii	">AAA>"
- 530      3E
- 531 00f0 7F090909 		.ascii	"\177\011\011\011\006"
- 531      06
- 532 00f5 3E415121 		.ascii	">AQ!^"
- 532      5E
- 533 00fa 7F090919 		.ascii	"\177\011\011\031f"
- 533      66
- 534 00ff 46494949 		.ascii	"FIII1"
- 534      31
- 535 0104 01017F01 		.ascii	"\001\001\177\001\001"
- 535      01
- 536 0109 3F404040 		.ascii	"?@@@?"
- 536      3F
- 537 010e 0F304030 		.ascii	"\0170@0\017"
- 537      0F
- 538 0113 3F403840 		.ascii	"?@8@?"
- 538      3F
- 539 0118 63140814 		.ascii	"c\024\010\024c"
- 539      63
- 540 011d 03047804 		.ascii	"\003\004x\004\003"
- 540      03
- 541 0122 61514945 		.ascii	"aQIEC"
-ARM GAS  /tmp/ccIxc9Ce.s 			page 15
+ 360 002c 00000000 		.word	.LANCHOR0
+ 361              		.cfi_endproc
+ 362              	.LFE69:
+ 364              		.section	.text.set_draw_coordinates,"ax",%progbits
+ 365              		.align	1
+ 366              		.global	set_draw_coordinates
+ 367              		.syntax unified
+ 368              		.thumb
+ 369              		.thumb_func
+ 370              		.fpu softvfp
+ 372              	set_draw_coordinates:
+ 373              	.LVL35:
+ 374              	.LFB70:
+ 192:Core/Src/n5110_driver.c **** 
+ 193:Core/Src/n5110_driver.c **** 
+ 194:Core/Src/n5110_driver.c **** //move the draw cursor to x,y with 0<=x<=83 and 0<=y<=5
+ 195:Core/Src/n5110_driver.c **** //every y increment represents 8 pixels, thus y=5 means that the cursor is on the bottom row of 8 p
+ 196:Core/Src/n5110_driver.c **** void set_draw_coordinates(int x, int y) {
+ 375              		.loc 1 196 41 is_stmt 1 view -0
+ 376              		.cfi_startproc
+ 377              		@ args = 0, pretend = 0, frame = 0
+ 378              		@ frame_needed = 0, uses_anonymous_args = 0
+ 197:Core/Src/n5110_driver.c **** 	if(x<0 || x>83 || y<0 || y>5) {
+ 379              		.loc 1 197 2 view .LVU69
+ 380              		.loc 1 197 4 is_stmt 0 view .LVU70
+ 381 0000 5328     		cmp	r0, #83
+ 382 0002 03D8     		bhi	.L27
+ 383              		.loc 1 197 17 discriminator 1 view .LVU71
+ 384 0004 0029     		cmp	r1, #0
+ 385 0006 01DB     		blt	.L27
+ 386              		.loc 1 197 24 discriminator 2 view .LVU72
+ 387 0008 0529     		cmp	r1, #5
+ 388 000a 00DD     		ble	.L30
+ 389              	.L27:
+ 390 000c 7047     		bx	lr
+ 391              	.L30:
+ 196:Core/Src/n5110_driver.c **** 	if(x<0 || x>83 || y<0 || y>5) {
+ 392              		.loc 1 196 41 view .LVU73
+ 393 000e 10B5     		push	{r4, lr}
+ 394              	.LCFI8:
+ 395              		.cfi_def_cfa_offset 8
+ 396              		.cfi_offset 4, -8
+ 397              		.cfi_offset 14, -4
+ 198:Core/Src/n5110_driver.c **** 		return;
+ 199:Core/Src/n5110_driver.c **** 	}
+ 200:Core/Src/n5110_driver.c **** 	uint8_t x_command = 0b10000000;
+ 398              		.loc 1 200 2 is_stmt 1 view .LVU74
+ 399              	.LVL36:
+ 201:Core/Src/n5110_driver.c **** 	uint8_t y_command = 0b01000000;
+ 400              		.loc 1 201 2 view .LVU75
+ 202:Core/Src/n5110_driver.c **** 	x_command += x;
+ 401              		.loc 1 202 2 view .LVU76
+ 402              		.loc 1 202 12 is_stmt 0 view .LVU77
+ 403 0010 8038     		subs	r0, r0, #128
+ 404              	.LVL37:
+ 203:Core/Src/n5110_driver.c **** 	y_command += y;
+ 405              		.loc 1 203 2 is_stmt 1 view .LVU78
+ARM GAS  /tmp/ccVG0MLh.s 			page 12
 
 
- 541      43
- 542 0127 7F414100 		.ascii	"\177AA\000\000"
- 542      00
- 543 012c 02040810 		.ascii	"\002\004\010\020 "
- 543      20
- 544 0131 00004141 		.ascii	"\000\000AA\177"
- 544      7F
- 545 0136 04020102 		.ascii	"\004\002\001\002\004"
- 545      04
- 546 013b 40404040 		.ascii	"@@@@@"
- 546      40
- 547 0140 00010204 		.ascii	"\000\001\002\004\000"
- 547      00
- 548 0145 20545454 		.ascii	" TTTx"
- 548      78
- 549 014a 7F484444 		.ascii	"\177HDD8"
- 549      38
- 550 014f 38444444 		.ascii	"8DDD "
- 550      20
- 551 0154 38444448 		.ascii	"8DDH\177"
- 551      7F
- 552 0159 38545454 		.ascii	"8TTT\030"
- 552      18
- 553 015e 087E0901 		.ascii	"\010~\011\001\002"
- 553      02
- 554 0163 0C525252 		.ascii	"\014RRR>"
- 554      3E
- 555 0168 7F080404 		.ascii	"\177\010\004\004x"
- 555      78
- 556 016d 00447D40 		.ascii	"\000D}@\000"
- 556      00
- 557 0172 2040443D 		.ascii	" @D=\000"
- 557      00
- 558 0177 7F102844 		.ascii	"\177\020(D\000"
- 558      00
- 559 017c 00417F40 		.ascii	"\000A\177@\000"
- 559      00
- 560 0181 78040804 		.ascii	"x\004\010\004x"
- 560      78
- 561 0186 7C080404 		.ascii	"|\010\004\004x"
- 561      78
- 562 018b 38444444 		.ascii	"8DDD8"
- 562      38
- 563 0190 7C141414 		.ascii	"|\024\024\024\010"
- 563      08
- 564 0195 0814147C 		.ascii	"\010\024\024|\000"
- 564      00
- 565 019a 7C080404 		.ascii	"|\010\004\004\010"
- 565      08
- 566 019f 48545454 		.ascii	"HTTT "
- 566      20
- 567 01a4 043F4440 		.ascii	"\004?D@ "
- 567      20
- 568 01a9 3C404020 		.ascii	"<@@ |"
- 568      7C
- 569 01ae 1C204020 		.ascii	"\034 @ \034"
- 569      1C
-ARM GAS  /tmp/ccIxc9Ce.s 			page 16
+ 406              		.loc 1 203 12 is_stmt 0 view .LVU79
+ 407 0012 4031     		adds	r1, r1, #64
+ 408              	.LVL38:
+ 409              		.loc 1 203 12 view .LVU80
+ 410 0014 CCB2     		uxtb	r4, r1
+ 411              	.LVL39:
+ 204:Core/Src/n5110_driver.c **** 	spi_tx_byte(x_command, COMMAND);
+ 412              		.loc 1 204 2 is_stmt 1 view .LVU81
+ 413 0016 0121     		movs	r1, #1
+ 414              	.LVL40:
+ 415              		.loc 1 204 2 is_stmt 0 view .LVU82
+ 416 0018 C0B2     		uxtb	r0, r0
+ 417              	.LVL41:
+ 418              		.loc 1 204 2 view .LVU83
+ 419 001a FFF7FEFF 		bl	spi_tx_byte
+ 420              	.LVL42:
+ 205:Core/Src/n5110_driver.c **** 	spi_tx_byte(y_command, COMMAND);
+ 421              		.loc 1 205 2 is_stmt 1 view .LVU84
+ 422 001e 0121     		movs	r1, #1
+ 423 0020 2046     		mov	r0, r4
+ 424 0022 FFF7FEFF 		bl	spi_tx_byte
+ 425              	.LVL43:
+ 206:Core/Src/n5110_driver.c **** }
+ 426              		.loc 1 206 1 is_stmt 0 view .LVU85
+ 427 0026 10BD     		pop	{r4, pc}
+ 428              		.loc 1 206 1 view .LVU86
+ 429              		.cfi_endproc
+ 430              	.LFE70:
+ 432              		.global	FONT_7x5
+ 433              		.section	.data.FONT_7x5,"aw"
+ 434              		.align	2
+ 435              		.set	.LANCHOR0,. + 0
+ 438              	FONT_7x5:
+ 439 0000 00000000 		.ascii	"\000\000\000\000\000"
+ 439      00
+ 440 0005 00004F00 		.ascii	"\000\000O\000\000"
+ 440      00
+ 441 000a 00070007 		.ascii	"\000\007\000\007\000"
+ 441      00
+ 442 000f 147F147F 		.ascii	"\024\177\024\177\024"
+ 442      14
+ 443 0014 242A7F2A 		.ascii	"$*\177*\022"
+ 443      12
+ 444 0019 23130864 		.ascii	"#\023\010db"
+ 444      62
+ 445 001e 36495522 		.ascii	"6IU\"P"
+ 445      50
+ 446 0023 00050300 		.ascii	"\000\005\003\000\000"
+ 446      00
+ 447 0028 001C2241 		.ascii	"\000\034\"A\000"
+ 447      00
+ 448 002d 0041221C 		.ascii	"\000A\"\034\000"
+ 448      00
+ 449 0032 14083E08 		.ascii	"\024\010>\010\024"
+ 449      14
+ 450 0037 08083E08 		.ascii	"\010\010>\010\010"
+ 450      08
+ARM GAS  /tmp/ccVG0MLh.s 			page 13
 
 
- 570 01b3 3C403040 		.ascii	"<@0@<"
- 570      3C
- 571 01b8 44281028 		.ascii	"D(\020(D"
- 571      44
- 572 01bd 0C505050 		.ascii	"\014PPP<"
- 572      3C
- 573 01c2 4464544C 		.ascii	"DdTLD"
- 573      44
- 574 01c7 00083641 		.ascii	"\000\0106A\000"
- 574      00
- 575 01cc 00007F00 		.ascii	"\000\000\177\000\000"
- 575      00
- 576 01d1 00413608 		.ascii	"\000A6\010\000"
- 576      00
- 577 01d6 08040408 		.ascii	"\010\004\004\010\004"
- 577      04
- 578 01db 00000000 		.space	5
- 578      00
- 579              		.text
- 580              	.Letext0:
- 581              		.file 2 "/home/daan/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
- 582              		.file 3 "/home/daan/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
- 583              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
- 584              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h"
- 585              		.file 6 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h"
- 586              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h"
- 587              		.file 8 "Core/Inc/main.h"
- 588              		.file 9 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
- 589              		.file 10 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
- 590              		.file 11 "Core/Src/n5110_driver.h"
-ARM GAS  /tmp/ccIxc9Ce.s 			page 17
+ 451 003c 00503000 		.ascii	"\000P0\000\000"
+ 451      00
+ 452 0041 08080808 		.ascii	"\010\010\010\010\010"
+ 452      08
+ 453 0046 00606000 		.ascii	"\000``\000\000"
+ 453      00
+ 454 004b 20100804 		.ascii	" \020\010\004\002"
+ 454      02
+ 455 0050 3E514945 		.ascii	">QIE>"
+ 455      3E
+ 456 0055 00427F40 		.ascii	"\000B\177@\000"
+ 456      00
+ 457 005a 42615149 		.ascii	"BaQIF"
+ 457      46
+ 458 005f 2141454B 		.ascii	"!AEK1"
+ 458      31
+ 459 0064 1814127F 		.ascii	"\030\024\022\177\020"
+ 459      10
+ 460 0069 27454545 		.ascii	"'EEE9"
+ 460      39
+ 461 006e 3C4A4949 		.ascii	"<JII0"
+ 461      30
+ 462 0073 03710905 		.ascii	"\003q\011\005\003"
+ 462      03
+ 463 0078 36494949 		.ascii	"6III6"
+ 463      36
+ 464 007d 06494929 		.ascii	"\006II)\036"
+ 464      1E
+ 465 0082 006C6C00 		.ascii	"\000ll\000\000"
+ 465      00
+ 466 0087 00563600 		.ascii	"\000V6\000\000"
+ 466      00
+ 467 008c 08142241 		.ascii	"\010\024\"A\000"
+ 467      00
+ 468 0091 14141414 		.ascii	"\024\024\024\024\024"
+ 468      14
+ 469 0096 00412214 		.ascii	"\000A\"\024\010"
+ 469      08
+ 470 009b 02015109 		.ascii	"\002\001Q\011\006"
+ 470      06
+ 471 00a0 32497941 		.ascii	"2IyA>"
+ 471      3E
+ 472 00a5 7E111111 		.ascii	"~\021\021\021~"
+ 472      7E
+ 473 00aa 7F494949 		.ascii	"\177III>"
+ 473      3E
+ 474 00af 3E414141 		.ascii	">AAA\""
+ 474      22
+ 475 00b4 7F414141 		.ascii	"\177AAA>"
+ 475      3E
+ 476 00b9 7F494949 		.ascii	"\177IIII"
+ 476      49
+ 477 00be 7F090909 		.ascii	"\177\011\011\011\001"
+ 477      01
+ 478 00c3 3E414949 		.ascii	">AII:"
+ 478      3A
+ 479 00c8 7F080808 		.ascii	"\177\010\010\010\177"
+ARM GAS  /tmp/ccVG0MLh.s 			page 14
+
+
+ 479      7F
+ 480 00cd 41417F41 		.ascii	"AA\177AA"
+ 480      41
+ 481 00d2 3041413F 		.ascii	"0AA?\001"
+ 481      01
+ 482 00d7 7F081422 		.ascii	"\177\010\024\"A"
+ 482      41
+ 483 00dc 7F404040 		.ascii	"\177@@@@"
+ 483      40
+ 484 00e1 7F020C02 		.ascii	"\177\002\014\002\177"
+ 484      7F
+ 485 00e6 7F040810 		.ascii	"\177\004\010\020\177"
+ 485      7F
+ 486 00eb 3E414141 		.ascii	">AAA>"
+ 486      3E
+ 487 00f0 7F090909 		.ascii	"\177\011\011\011\006"
+ 487      06
+ 488 00f5 3E415121 		.ascii	">AQ!^"
+ 488      5E
+ 489 00fa 7F090919 		.ascii	"\177\011\011\031f"
+ 489      66
+ 490 00ff 46494949 		.ascii	"FIII1"
+ 490      31
+ 491 0104 01017F01 		.ascii	"\001\001\177\001\001"
+ 491      01
+ 492 0109 3F404040 		.ascii	"?@@@?"
+ 492      3F
+ 493 010e 0F304030 		.ascii	"\0170@0\017"
+ 493      0F
+ 494 0113 3F403840 		.ascii	"?@8@?"
+ 494      3F
+ 495 0118 63140814 		.ascii	"c\024\010\024c"
+ 495      63
+ 496 011d 03047804 		.ascii	"\003\004x\004\003"
+ 496      03
+ 497 0122 61514945 		.ascii	"aQIEC"
+ 497      43
+ 498 0127 7F414100 		.ascii	"\177AA\000\000"
+ 498      00
+ 499 012c 02040810 		.ascii	"\002\004\010\020 "
+ 499      20
+ 500 0131 00004141 		.ascii	"\000\000AA\177"
+ 500      7F
+ 501 0136 04020102 		.ascii	"\004\002\001\002\004"
+ 501      04
+ 502 013b 40404040 		.ascii	"@@@@@"
+ 502      40
+ 503 0140 00010204 		.ascii	"\000\001\002\004\000"
+ 503      00
+ 504 0145 20545454 		.ascii	" TTTx"
+ 504      78
+ 505 014a 7F484444 		.ascii	"\177HDD8"
+ 505      38
+ 506 014f 38444444 		.ascii	"8DDD "
+ 506      20
+ 507 0154 38444448 		.ascii	"8DDH\177"
+ 507      7F
+ARM GAS  /tmp/ccVG0MLh.s 			page 15
+
+
+ 508 0159 38545454 		.ascii	"8TTT\030"
+ 508      18
+ 509 015e 087E0901 		.ascii	"\010~\011\001\002"
+ 509      02
+ 510 0163 0C525252 		.ascii	"\014RRR>"
+ 510      3E
+ 511 0168 7F080404 		.ascii	"\177\010\004\004x"
+ 511      78
+ 512 016d 00447D40 		.ascii	"\000D}@\000"
+ 512      00
+ 513 0172 2040443D 		.ascii	" @D=\000"
+ 513      00
+ 514 0177 7F102844 		.ascii	"\177\020(D\000"
+ 514      00
+ 515 017c 00417F40 		.ascii	"\000A\177@\000"
+ 515      00
+ 516 0181 78040804 		.ascii	"x\004\010\004x"
+ 516      78
+ 517 0186 7C080404 		.ascii	"|\010\004\004x"
+ 517      78
+ 518 018b 38444444 		.ascii	"8DDD8"
+ 518      38
+ 519 0190 7C141414 		.ascii	"|\024\024\024\010"
+ 519      08
+ 520 0195 0814147C 		.ascii	"\010\024\024|\000"
+ 520      00
+ 521 019a 7C080404 		.ascii	"|\010\004\004\010"
+ 521      08
+ 522 019f 48545454 		.ascii	"HTTT "
+ 522      20
+ 523 01a4 043F4440 		.ascii	"\004?D@ "
+ 523      20
+ 524 01a9 3C404020 		.ascii	"<@@ |"
+ 524      7C
+ 525 01ae 1C204020 		.ascii	"\034 @ \034"
+ 525      1C
+ 526 01b3 3C403040 		.ascii	"<@0@<"
+ 526      3C
+ 527 01b8 44281028 		.ascii	"D(\020(D"
+ 527      44
+ 528 01bd 0C505050 		.ascii	"\014PPP<"
+ 528      3C
+ 529 01c2 4464544C 		.ascii	"DdTLD"
+ 529      44
+ 530 01c7 00083641 		.ascii	"\000\0106A\000"
+ 530      00
+ 531 01cc 00007F00 		.ascii	"\000\000\177\000\000"
+ 531      00
+ 532 01d1 00413608 		.ascii	"\000A6\010\000"
+ 532      00
+ 533 01d6 08040408 		.ascii	"\010\004\004\010\004"
+ 533      04
+ 534 01db 00000000 		.space	5
+ 534      00
+ 535              		.text
+ 536              	.Letext0:
+ 537              		.file 2 "/home/daan/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ARM GAS  /tmp/ccVG0MLh.s 			page 16
+
+
+ 538              		.file 3 "/home/daan/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none
+ 539              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 540              		.file 5 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h"
+ 541              		.file 6 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h"
+ 542              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h"
+ 543              		.file 8 "Core/Inc/main.h"
+ 544              		.file 9 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h"
+ 545              		.file 10 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h"
+ 546              		.file 11 "Core/Src/n5110_driver.h"
+ARM GAS  /tmp/ccVG0MLh.s 			page 17
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 n5110_driver.c
-     /tmp/ccIxc9Ce.s:16     .text.init_n5110:0000000000000000 $t
-     /tmp/ccIxc9Ce.s:24     .text.init_n5110:0000000000000000 init_n5110
-     /tmp/ccIxc9Ce.s:187    .text.init_n5110:00000000000000f4 $d
-     /tmp/ccIxc9Ce.s:195    .text.spi_tx_byte:0000000000000000 $t
-     /tmp/ccIxc9Ce.s:202    .text.spi_tx_byte:0000000000000000 spi_tx_byte
-     /tmp/ccIxc9Ce.s:282    .text.spi_tx_byte:000000000000004c $d
-     /tmp/ccIxc9Ce.s:288    .text.clear_screen:0000000000000000 $t
-     /tmp/ccIxc9Ce.s:295    .text.clear_screen:0000000000000000 clear_screen
-     /tmp/ccIxc9Ce.s:338    .text.write_char:0000000000000000 $t
-     /tmp/ccIxc9Ce.s:345    .text.write_char:0000000000000000 write_char
-     /tmp/ccIxc9Ce.s:404    .text.write_char:000000000000002c $d
-     /tmp/ccIxc9Ce.s:409    .text.set_draw_coordinates:0000000000000000 $t
-     /tmp/ccIxc9Ce.s:416    .text.set_draw_coordinates:0000000000000000 set_draw_coordinates
-     /tmp/ccIxc9Ce.s:482    .data.FONT_7x5:0000000000000000 FONT_7x5
-     /tmp/ccIxc9Ce.s:478    .data.FONT_7x5:0000000000000000 $d
+     /tmp/ccVG0MLh.s:16     .text.spi_tx_byte:0000000000000000 $t
+     /tmp/ccVG0MLh.s:24     .text.spi_tx_byte:0000000000000000 spi_tx_byte
+     /tmp/ccVG0MLh.s:105    .text.spi_tx_byte:000000000000004c $d
+     /tmp/ccVG0MLh.s:111    .text.init_n5110:0000000000000000 $t
+     /tmp/ccVG0MLh.s:118    .text.init_n5110:0000000000000000 init_n5110
+     /tmp/ccVG0MLh.s:217    .text.init_n5110:0000000000000084 $d
+     /tmp/ccVG0MLh.s:224    .text.clear_screen:0000000000000000 $t
+     /tmp/ccVG0MLh.s:231    .text.clear_screen:0000000000000000 clear_screen
+     /tmp/ccVG0MLh.s:274    .text.write_screen_buffer:0000000000000000 $t
+     /tmp/ccVG0MLh.s:281    .text.write_screen_buffer:0000000000000000 write_screen_buffer
+     /tmp/ccVG0MLh.s:294    .text.write_char:0000000000000000 $t
+     /tmp/ccVG0MLh.s:301    .text.write_char:0000000000000000 write_char
+     /tmp/ccVG0MLh.s:360    .text.write_char:000000000000002c $d
+     /tmp/ccVG0MLh.s:365    .text.set_draw_coordinates:0000000000000000 $t
+     /tmp/ccVG0MLh.s:372    .text.set_draw_coordinates:0000000000000000 set_draw_coordinates
+     /tmp/ccVG0MLh.s:438    .data.FONT_7x5:0000000000000000 FONT_7x5
+     /tmp/ccVG0MLh.s:434    .data.FONT_7x5:0000000000000000 $d
 
 UNDEFINED SYMBOLS
 HAL_GPIO_WritePin
-HAL_Delay
 HAL_SPI_Transmit
 hspi1
+HAL_Delay

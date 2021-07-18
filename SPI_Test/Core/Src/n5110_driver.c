@@ -4,7 +4,21 @@
 
 
 /* configure pins for screen communication  */
-uint16_t poop;
+#define LED LED_Pin
+#define LED_PORT GPIOB
+
+#define DC DC_Pin
+#define DC_PORT GPIOA
+
+#define RST RST_Pin
+#define RST_PORT GPIOA
+
+#define SCE SCE_Pin
+#define SCE_PORT GPIOA
+
+#define VCC VCC_Pin
+#define VCC_PORT GPIOB
+
 
 
 // Font 7x5 Bitmap (ASCII)
@@ -111,47 +125,29 @@ static uint8_t screen_buffer[SCREEN_WIDTH][SCREEN_HEIGHT/8]; //screen buffer
 //initialize display
 void init_n5110() {
 
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1); //set SCE to high to make sure display driver doesnt accept input
-	HAL_GPIO_WritePin(GPIOB, VCC_Pin, 1); //turn on display driver
+	HAL_GPIO_WritePin(SCE_PORT, SCE, 1); //set SCE to high to make sure display driver doesnt accept input
+	HAL_GPIO_WritePin(VCC_PORT, VCC, 1); //turn on display driver
 
 	//briefly set rst pint to 0 to reset display driver
-	HAL_GPIO_WritePin(GPIOA, RST_Pin, 1);
+	HAL_GPIO_WritePin(RST_PORT, RST, 1);
 	HAL_Delay(10);
-	HAL_GPIO_WritePin(GPIOA, RST_Pin, 0);
+	HAL_GPIO_WritePin(RST_PORT, RST, 0);
 	HAL_Delay(10);
-	HAL_GPIO_WritePin(GPIOA, RST_Pin, 1);
+	HAL_GPIO_WritePin(RST_PORT, RST, 1);
 	HAL_Delay(10);
 
 	//test display led
-	HAL_GPIO_WritePin(GPIOB, LED_Pin, 1);
+	HAL_GPIO_WritePin(LED_PORT, LED, 1);
 
 	uint8_t init_display_instructions[] = {0b00100001,	//function set PD=0, V=0, H=1 (extended instruction set)
-										   0b11010000,	//set Vop to +16 * b[V]
+										   0b11010000,	//set Vop to +80 * b[V]
 										   0b00100000,	//function set PD=0, V=0, H=0 (normal instruction set)
 										   0b00001100}; //display control set normal mode (D=1, E=0)
 
-	//set DC to 0 for commands
-	HAL_GPIO_WritePin(GPIOA, DC_Pin, 0);
-
-	//function set PD=0, V=0, H=1 (extended instruction set)
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &init_display_instructions[0], 1, 10);
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
-
-	//set Vop to +16 * b[V]
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &init_display_instructions[1], 1, 10);
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
-
-	//function set PD=0, V=0, H=0 (normal instruction set)
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &init_display_instructions[2], 1, 10);
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
-
-	//display control set inverse mode (D=1, E=0)
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
-	HAL_SPI_Transmit(&hspi1, &init_display_instructions[3], 1, 10);
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
+	spi_tx_byte(init_display_instructions[0], COMMAND);
+	spi_tx_byte(init_display_instructions[1], COMMAND);
+	spi_tx_byte(init_display_instructions[2], COMMAND);
+	spi_tx_byte(init_display_instructions[3], COMMAND);
 
 	return;
 }
@@ -160,16 +156,16 @@ void init_n5110() {
 //write a byte to display
 void spi_tx_byte(uint8_t byte, int dc) {
 	if(dc == DATA)
-		HAL_GPIO_WritePin(GPIOA, DC_Pin, 1); //set DC to high to specify data
+		HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
 	else if(dc == COMMAND)
-		HAL_GPIO_WritePin(GPIOA, DC_Pin, 0); //set DC to low to specifiy command
+		HAL_GPIO_WritePin(DC_PORT, DC, 0); //set DC to low to specifiy command
 	else
 		return;
 
 
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 0);
+	HAL_GPIO_WritePin(SCE_PORT, SCE, 0);
 	HAL_SPI_Transmit(&hspi1, &byte, 1, 10);
-	HAL_GPIO_WritePin(GPIOA, SCE_Pin, 1);
+	HAL_GPIO_WritePin(SCE_PORT, SCE, 1);
 	return;
 }
 
@@ -181,6 +177,19 @@ void clear_screen() {
 	return;
 }
 
+//write the full screen buffer to display, optimized for speed
+void write_screen_buffer() {
+	set_draw_coordinates(0,0);
+
+	HAL_GPIO_WritePin(DC_PORT, DC, 1); //set DC to high to specify data
+
+	HAL_GPIO_WritePin(SCE_PORT, SCE, 0);
+	
+	HAL_SPI_Transmit(&hspi1, &screen_buffer, sizeof(screen_buffer), 10);
+
+	HAL_GPIO_WritePin(SCE_PORT, SCE, 1);
+
+}
 
 void write_char(char character) {
 	int column;

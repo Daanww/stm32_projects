@@ -99,10 +99,16 @@ int main(void)
 
 	char test_string[] = "Super Mama";
 
-	for(int i = 0; i < sizeof(test_string)/sizeof(char); i++) {
+	for(int i = 0; i < strlen(test_string); i++) {
 		write_char(test_string[i]);
 	}
 
+	set_draw_coordinates(20, 4);
+
+	char test_string_2[] = "Piemol";
+		for(int i = 0; i < strlen(test_string_2); i++) {
+		write_char(test_string_2[i]);
+	}
 	
 
 	/*
